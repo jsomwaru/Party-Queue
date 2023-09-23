@@ -1,23 +1,12 @@
-from tornado import ioloop
-from tornado import web
-from tornado import gen 
+#!/usr/bin/env python
+import aiohttp_jinja2
+import jinja2
+from aiohttp import web
 
-class MainHandler(web.RequestHandler):
-	@gen.coroutine
-	def get(self):
-		self.render('index.html')
-	
-	@gen.coroutine
-	def post(self):
-		title = get_body_argument("artist")
-		song  = get_body_argument("song")
-		
-def make_app():
-	return web.Application([
-		(r"/", MainHandler),
-	])
+import routes
 
-if __name__ == "__main__":
-	app = make_app()
-	app.listen(8888)
-	ioloop.IOLoop.current().start()
+if __name__ == "__main__":	
+	app = web.Application()
+	aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader('templates'))
+	app.add_routes([web.get('/', routes.getreq),web.post('/', routes.songreq)])
+	web.run_app(app, host='0.0.0.0', port=80)

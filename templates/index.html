@@ -1,0 +1,47 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <title>Party Q</title>
+  <meta name="description" content="PartyQ">
+
+</head>
+
+<body>
+  <form id="song-form">
+    Song:<br>
+    <input type="text" name="song" value=""><br><br>
+    <button id="song-button" type="submit">Submit</button> 
+  </form>
+  <div id="response-text">
+  </div>
+  <script>
+    var response_text = document.getElementById("response-text")
+    var form = document.getElementById("song-form")
+    function sendData(e) {
+      e.preventDefault()
+      var formData = new FormData(e.target)
+      console.log(Object.fromEntries(formData))
+      fetch(window.origin, {
+        method: "post",
+        body: formData
+      }).then((res) => {
+        if (!res.ok) {
+          response_text.innerHTML = "There was an error submitting song request"
+        }
+        else {
+          response_text.innerHTML = "Song Submitted"
+        }
+      })
+      var inputs = e.target.getElementsByTagName("input")
+      console.log(inputs[0])
+      for (let i = 0; i < inputs.length; ++i) {
+        inputs[i].value = "" 
+      }
+    }
+    form.addEventListener("submit", sendData) 
+  </script>
+</body>
+</html>
