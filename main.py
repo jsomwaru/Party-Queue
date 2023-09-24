@@ -8,5 +8,9 @@ import routes
 if __name__ == "__main__":	
 	app = web.Application()
 	aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader('templates'))
-	app.add_routes([web.get('/', routes.getreq),web.post('/', routes.songreq)])
+	app.add_routes([
+		web.get('/', routes.getreq), 
+		web.post('/', routes.songreq),
+		web.post('/add', routes.add)
+	])
 	web.run_app(app, host='0.0.0.0', port=80)
