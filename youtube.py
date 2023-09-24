@@ -24,7 +24,8 @@ class YTClient:
 
     base_url = "https://www.youtube.com/watch?v={}"
 
-    def __init__(self, url):
+    def __init__(self, video_id):
+        url = self.base_url.format(video_id)
         self.yt = YouTube(url)
         self._stream = None
 

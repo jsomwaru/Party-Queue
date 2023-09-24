@@ -19,9 +19,10 @@ async def songreq(request):
 		raise web.HTTPBadRequest(text = 'Enter a song') from e
 
 async def add(request):
-	data = await request.post()
+	data = await request.json()
 	try:
 		video_id = data["videoId"]
 		Q.enqueue(video_id)
+		return web.HTTPAccepted()
 	except KeyError as e:
 		raise web.HTTPBadRequest(text = 'Error adding selection to queue') from e
