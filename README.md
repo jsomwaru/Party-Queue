@@ -1,1 +1,3 @@
-Bitchin' way to play shitty songs
+# PartyQ
+
+Shitty way to play songs

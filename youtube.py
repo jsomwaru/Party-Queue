@@ -26,7 +26,7 @@ class YTClient:
 
     def __init__(self, video_id):
         url = self.base_url.format(video_id)
-        self.yt = YouTube(url)
+        self.yt = YouTube(url, use_oauth=True, allow_oauth_cache=True)
         self._stream = None
 
     def get_best_audio_stream(self, best_effort=True):
@@ -35,6 +35,7 @@ class YTClient:
         """
         if not self.is_audio_available and not best_effort:
             raise NoStreamFoundException("Audio stream not found")
+        #self._stream = StreamWrapper(self.yt.streams.filter(only_audio=True, mime_type="audio/webm").order_by("abr")[-1])
         self._stream = StreamWrapper(self.yt.streams.get_audio_only())
 
     @property
@@ -60,6 +61,7 @@ class YTClient:
         return self._stream._stream
 
     def metadata(self):
+        print(self.cur_stream)
         return {
             "title": self.cur_stream.title,
             "duration": None,
