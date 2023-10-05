@@ -1,0 +1,14 @@
+services:
+  redis:
+    image: redis:7.2.1-alpine3.18
+    command: redis-server --save "" --appendonly no --bind 0.0.0.0
+    ports:
+      - 127.0.0.1:6379:6379
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 50M
+        reservations:
+          cpus: '0.5'
+          memory: 20M
