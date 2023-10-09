@@ -1,5 +1,3 @@
-import json
-
 import aiohttp_jinja2
 from aiohttp import web
 from aiohttp.web_ws import WebSocketResponse
@@ -62,12 +60,19 @@ async def add(request):
 
 async def QWatcher(request):
 	session = await get_session(request)
-	ws = WebSocketResponse()
-	request.app["websockets"][session.identity] = ws
-	await ws.prepare(request)
-	results = db.get_by_status("enqueue")
-	await ws.send_str(json.dumps(results))
-	return ws
+	resp = None
+	resp = WebSocketResponse()
+	request.app["websockets"][session.identity] = resp
+	logger.info("creating new websocket")
+	await resp.prepare(request)
+	try:
+		async for _ in resp:
+			results = db.get_by_status("enqueue")
+			await resp.send_json(results)
+		return resp
+	finally:
+		logger.info("Client %s disconnected", session.identity)
+		await request.app["websockets"][session.identity].close()
 
 
 async def on_shutdown(app):

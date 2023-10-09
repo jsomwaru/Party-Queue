@@ -81,6 +81,11 @@
     socket.addEventListener("message", (event) => {
       console.log("Message from server ", event.data);
     })
+
+    setInterval((socket) => {
+      socket.send("inquire")
+    },  5000, socket)
+
   </script>
 </body>
 </html>

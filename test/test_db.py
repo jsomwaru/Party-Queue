@@ -10,20 +10,20 @@ import db
 
 
 metadata = {
-    "name": "test-song",
+    "title": "test-song",
     "videoId": "1",
     "requestor": "me",
     "status": "enqueue"
 }
 
-# db.add_song(metadata)
+db.add_song(metadata)
 
-conn = sqlite3.connect("../media/q.db")
+# conn = sqlite3.connect("../media/q.db")
 
-# db.update_status("1", "playing")
+# # db.update_status("1", "playing")
 
-cur = conn.execute("SELECT * FROM Q WHERE 1=1")
+# cur = conn.execute("SELECT * FROM Q WHERE 1=1")
 
-print(cur.fetchall())
+# print(cur.fetchall())
 
-conn.close()
+# conn.close()
