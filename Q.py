@@ -9,10 +9,8 @@ import youtube
 
 Q = []
 
-def enqueue(metadata):
-    Q.append(metadata["videoId"])
-    conn = db.setup_db()
-    db.add_song(conn, metadata)
+def enqueue(videoId):
+    Q.append(videoId)
 
 def dequeue():
     if len(Q) > 0:
@@ -32,6 +30,7 @@ def partyQ():
     while 1:
         vid = dequeue()
         if vid:
+            db.update_status(vid, "playing")
             print(f"playing {vid}")
             buffer = download(vid)
             print("downloaded")

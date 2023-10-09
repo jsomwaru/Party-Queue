@@ -4,7 +4,7 @@ import requests
 import ytmusicapi
 
 """
-Find function where URL is descrambled for downloading
+THIS IS BULLSHIT
 """
 
 class NoStreamFoundException(Exception):

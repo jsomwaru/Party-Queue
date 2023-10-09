@@ -1,13 +1,13 @@
 #!/bin/bash
 pushd components/
 id=$(docker ps --filter "name=redis" --format "{{.ID}}")
-if [ -n $id ]
+if [ -z $id ]
 then
-    echo "Restarting redis"
-    docker restart $id
-else
     echo "Starting redis"
     docker compose up -d
+else
+    echo "Restarting redis"
+    docker restart $id
 fi
 popd
 ./main.py

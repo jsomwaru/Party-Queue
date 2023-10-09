@@ -7,10 +7,12 @@ from aiohttp_session import get_session
 
 import Q
 import youtube
+import db
 
 
 @aiohttp_jinja2.template('index.html')
-async def getreq(_):
+async def getreq(request):
+	await get_session(request) # start or get session
 	return {}
 
 
@@ -21,7 +23,7 @@ async def songreq(request):
 		session = await get_session(request)
 		song =	data['song']
 		results = await youtube.search(song)
-		session["cache"] = results
+		session["cache"] = [res for res in results if "videoId" in list(res.keys())]
 		return web.json_response(results)
 	except KeyError as e:
 		raise web.HTTPBadRequest(text = 'Enter a song') from e
@@ -33,16 +35,26 @@ async def add(request):
 	try:
 		video_id = data["videoId"]
 		metadata = None
-		print(type(session.get("cache")))
-		for entry in session.get("cache"):
+		cache = session.get("cache")
+		if not cache:
+			if video_id == "undiefined":
+				raise KeyError
+			cache = await youtube.search(video_id)
+		for entry in cache:
 			entry_video = entry.get('videoId')
 			if video_id == entry_video:
 				metadata = entry
-		print(video_id, metadata)
-		if video_id and metadata:
-			Q.enqueue(metadata)
+		if video_id and metadata and video_id != "undefined":
+			Q.enqueue(video_id)
+			print(metadata)
+			metadata["requestor"] = session.identity
+			db.add_song(metadata)
+			print("added song in route")
+		else:
+			print("song not added")
 		return web.HTTPAccepted()
 	except KeyError as e:
+		print("key error", e)
 		raise web.HTTPBadRequest(text = 'Error adding selection to queue') from e
 
 
@@ -51,7 +63,5 @@ async def QWatcher(request):
 	request.app["websockets"][session.identity] = ws
 	ws = WebSocketResponse()
 	await ws.prepare(request)
-	conn = request.app["db"]
-	conn.execute(f"SELECT song, requestor, status FROM Q WHERE status in ('playing', 'waiting')")
-	results = conn.fetchall()
+	results = db.get_by_status("enqueue")
 	ws.send_str(json.dumps(results))

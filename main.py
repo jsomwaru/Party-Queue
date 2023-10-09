@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import asyncio
-import sqlite3
 
 import aiohttp_jinja2
 import jinja2
@@ -26,7 +25,7 @@ async def main():
 		web.post('/add', routes.add),
 		web.get('/qinfo', routes.QWatcher)
 	])
-	app["db"] = db.setup_db()
+	db.setup_db()
 	await asyncio.gather(
 		web._run_app(app, host='0.0.0.0', port=80),
 		asyncio.to_thread(Q.partyQ)
