@@ -34,13 +34,16 @@ def partyQ():
     while 1:
         vid = dequeue()
         if vid:
-            db.update_status(vid, "playing")
-            logger.info("Playing %s", vid)
+            meta = db.get_metadata(vid)
+            meta = meta.pop(0)
+            db.update_playing(vid, True)
+            logger.info("Playing %s", meta["songName"])
             buffer = download(vid)
-            logger.info("Downloaded %s", vid)
+            logger.info("Downloaded %s", meta["songName"])
             sound = AudioSegment.from_file(buffer)
             play(sound)
             db.update_status(vid, "dequeue")
+            db.update_playing(vid, False)
             del sound
             del buffer
             gc.collect()

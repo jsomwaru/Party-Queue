@@ -60,7 +60,6 @@ async def add(request):
 
 async def QWatcher(request):
 	session = await get_session(request)
-	resp = None
 	resp = WebSocketResponse()
 	request.app["websockets"][session.identity] = resp
 	logger.info("creating new websocket")
