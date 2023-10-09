@@ -1,3 +1,4 @@
+import gc
 import time
 from io import BytesIO
 
@@ -5,9 +6,12 @@ from pydub import AudioSegment
 from pydub.playback import play
 
 import db
+import logger as log
 import youtube
 
 Q = []
+
+logger = log.get_logger(__name__)
 
 def enqueue(videoId):
     Q.append(videoId)
@@ -31,9 +35,13 @@ def partyQ():
         vid = dequeue()
         if vid:
             db.update_status(vid, "playing")
-            print(f"playing {vid}")
+            logger.info("Playing %s", vid)
             buffer = download(vid)
-            print("downloaded")
+            logger.info("Downloaded %s", vid)
             sound = AudioSegment.from_file(buffer)
             play(sound)
+            db.update_status(vid, "dequeue")
+            del sound
+            del buffer
+            gc.collect()
         time.sleep(1)

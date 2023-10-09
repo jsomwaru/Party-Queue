@@ -25,6 +25,8 @@ async def main():
 		web.post('/add', routes.add),
 		web.get('/qinfo', routes.QWatcher)
 	])
+	app.on_shutdown.append(routes.on_shutdown)
+	app["websockets"] = {}
 	db.setup_db()
 	await asyncio.gather(
 		web._run_app(app, host='0.0.0.0', port=80),

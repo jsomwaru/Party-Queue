@@ -3,12 +3,16 @@ import json
 import aiohttp_jinja2
 from aiohttp import web
 from aiohttp.web_ws import WebSocketResponse
+from aiohttp import WSCloseCode
 from aiohttp_session import get_session
 
+import db
+import logger as log
 import Q
 import youtube
-import db
 
+
+logger = log.get_logger(__name__)
 
 @aiohttp_jinja2.template('index.html')
 async def getreq(request):
@@ -46,22 +50,26 @@ async def add(request):
 				metadata = entry
 		if video_id and metadata and video_id != "undefined":
 			Q.enqueue(video_id)
-			print(metadata)
+			logger.info("Added song to queue")
 			metadata["requestor"] = session.identity
 			db.add_song(metadata)
-			print("added song in route")
-		else:
-			print("song not added")
+			logger.info("Saved song metadata")
 		return web.HTTPAccepted()
 	except KeyError as e:
-		print("key error", e)
+		logger.error("Key error")
 		raise web.HTTPBadRequest(text = 'Error adding selection to queue') from e
 
 
 async def QWatcher(request):
 	session = await get_session(request)
-	request.app["websockets"][session.identity] = ws
 	ws = WebSocketResponse()
+	request.app["websockets"][session.identity] = ws
 	await ws.prepare(request)
 	results = db.get_by_status("enqueue")
-	ws.send_str(json.dumps(results))
+	await ws.send_str(json.dumps(results))
+	return ws
+
+
+async def on_shutdown(app):
+    for ws in set(app.get('websockets', [])):
+        await ws.close(code=WSCloseCode.GOING_AWAY, message='Server shutdown')
