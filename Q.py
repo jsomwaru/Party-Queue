@@ -21,6 +21,11 @@ def dequeue():
         return Q.pop(0)
     return None
 
+def peek() -> dict:
+    if len(Q) > 0:
+        return Q[0]
+    return {}
+
 def download(vid):
     buffer = BytesIO()
     yt = youtube.YTClient(vid)
@@ -30,20 +35,21 @@ def download(vid):
     return buffer
 
 def partyQ():
-    print("starting partyq")
+    logger.info("Starting PartyQ")
     while 1:
-        vid = dequeue()
+        meta = peek()
+        vid = meta.get("videoId")
         if vid:
-            meta = db.get_metadata(vid)
-            meta = meta.pop(0)
-            db.update_playing(vid, True)
-            logger.info("Playing %s", meta["songName"])
+            # meta = db.get_metadata(vid)
+            # meta = meta.pop(0)
+            # db.update_playing(vid, True)
+            logger.info("Playing %s", meta["title"])
             buffer = download(vid)
-            logger.info("Downloaded %s", meta["songName"])
+            logger.info("Downloaded %s", meta["title"])
             sound = AudioSegment.from_file(buffer)
             play(sound)
-            db.update_status(vid, "dequeue")
-            db.update_playing(vid, False)
+            # db.update_status(vid, "dequeue")
+            # db.update_playing(vid, False)
             del sound
             del buffer
             gc.collect()

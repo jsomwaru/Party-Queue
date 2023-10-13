@@ -12,23 +12,50 @@
 <body>
   <form id="song-form">
     Song:<br>
-    <input type="text" name="song" value=""><br><br>
-    <button id="song-button" type="submit">Submit</button>
+    <div class="qtable">
+      <input type="text" name="song" value="" class="row">
+      <button id="song-button" type="submit" class="row">Submit</button>
+    </div>
   </form>
   <div id="response-text">
   </div>
-  <div id="results">
+  <div id="qtable">
+    <div id="results" class="col">
+      <p>&nbsp;</p>
+    </div>
+    <div id="queue" class="col">
+      <!-- <p>Queue:</p> -->
+    </div>
   </div>
   <script>
+    function clearParent(parent) {
+      while (parent.firstChild) {
+        // if (parent.firstChild.tagName == "DIV")
+          parent.removeChild(parent.firstChild)
+      }
+    }
+
     function displayResults(results) {
       var resultlist = document.getElementById("results")
+      clearParent(resultlist)
       results.forEach((res) => {
           let listitem = document.createElement("div")
           let artistname = res.artists[0].name 
-          // let thumbnail = res.thumbnails[0].url
-          listitem.innerHTML = `${artistname} - ${res.title}`
+          let thumbnail = res.thumbnails[0].url
+          let img = document.createElement("img")
+          img.setAttribute("src", thumbnail)
+          img.setAttribute("class", "result-list")
+          img.setAttribute("height", "50px")
+          img.setAttribute("width", "50px")
+          let title = document.createElement("p")
+          title.setAttribute("class", "result-list")
+          title.innerHTML = `${artistname} - ${res.title}`
+          title.setAttribute("videoId", res.videoId)
+          img.setAttribute("videoId", res.videoId)
           listitem.setAttribute("videoId", res.videoId)
           let link = document.createElement("a")
+          listitem.appendChild(img)
+          listitem.appendChild(title)
           link.appendChild(listitem)
           resultlist.appendChild(link)
           link.addEventListener("click", (e) => {
@@ -49,7 +76,7 @@
     function sendData(e) {
       e.preventDefault()
       var formData = new FormData(e.target)
-      console.log(Object.fromEntries(formData))
+      var req = Object.fromEntries(formData)
       fetch(window.origin, {
         method: "post",
         body: formData
@@ -58,7 +85,7 @@
           response_text.innerHTML = "There was an error submitting song request"
         }
         else {
-          response_text.innerHTML = "Song Submitted"
+          response_text.innerHTML = `Results for "${req.song}":`
           return res
         }
       })
@@ -80,12 +107,59 @@
 
     socket.addEventListener("message", (event) => {
       console.log("Message from server ", event.data);
+      var qdiv = document.getElementById("queue")
+      var qdata = JSON.parse(event.data)
+      clearParent(qdiv)
+      qdata.forEach((res) => {
+        let elm = document.createElement("div")
+        elm.innerText = `${res.title}`
+        qdiv.appendChild(elm)
+      })
     })
 
     setInterval((socket) => {
       socket.send("inquire")
-    },  5000, socket)
+    }, 5000, socket)
 
   </script>
-</body>
+  <style>
+    .qtable:after {
+      content: "";
+      display: table;
+      clear: both;
+    }
+
+    .row {
+      float: left;
+    }
+
+    .col {
+      float: left;
+      width: 50%;
+    };
+
+    #response-text {
+      align-content: center;
+      margin: auto;
+      /* width: 50%; */
+      padding: 10px;
+      width:250px; /* or whatever width you want. */
+      max-width:250px;
+    }
+
+    body {
+      font-family: monospace;
+      font-size: large;
+    }
+
+    .result-list {
+      display: inline-block;
+    }
+    
+    img {
+      padding-right: 5px;
+    }
+
+  </style>
+  </body>
 </html>

@@ -47,9 +47,10 @@ async def add(request):
 			if video_id == entry_video:
 				metadata = entry
 		if video_id and metadata and video_id != "undefined":
-			Q.enqueue(video_id)
-			logger.info("Added song to queue")
 			metadata["requestor"] = session.identity
+			Q.enqueue(metadata)
+			logger.info("Added song %s to queue", metadata["title"])
+			logger.debug(str(metadata))
 			db.add_song(metadata)
 			logger.info("Saved song metadata")
 		return web.HTTPAccepted()
@@ -64,16 +65,29 @@ async def QWatcher(request):
 	request.app["websockets"][session.identity] = resp
 	logger.info("creating new websocket")
 	await resp.prepare(request)
+	# results = db.get_by_status("enqueue")
+	await resp.send_json(Q.Q)
 	try:
 		async for _ in resp:
-			results = db.get_by_status("enqueue")
-			await resp.send_json(results)
+			# results = db.get_by_status("enqueue")
+			await resp.send_json(Q.Q)
 		return resp
 	finally:
 		logger.info("Client %s disconnected", session.identity)
 		await request.app["websockets"][session.identity].close()
 
 
+async def add_username(request):
+	session = await get_session(request)
+	data = await request.post()
+	username = data["username"]
+	db.add_session(session, username)
+
+
 async def on_shutdown(app):
-    for ws in set(app.get('websockets', [])):
-        await ws.close(code=WSCloseCode.GOING_AWAY, message='Server shutdown')
+	for ws in set(app.get('websockets', [])):
+		try:
+			await ws.close(code=WSCloseCode.GOING_AWAY, message='Server shutdown')
+		except Exception:
+			pass
+

@@ -10,7 +10,7 @@ def setup_db():
     db.execute(
         "CREATE TABLE IF NOT EXISTS Q(videoId, songName, requestor, status, playing)"
     )
-    print("table created")
+    db.execute("CREATE TABLE IF NOT EXISTS Session(id, username)")
     db.commit()
     db.close()
 
@@ -61,3 +61,9 @@ def format_results(results):
         ]
     return []
     
+def add_session(session, username):
+    if session.created:
+        db = get_db()
+        db.execute("INSERT INTO Session (?,?)", [session.idenity, username])
+        db.commit()
+        db.close()
