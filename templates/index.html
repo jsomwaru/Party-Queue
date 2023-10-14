@@ -8,14 +8,24 @@
   <meta name="description" content="PartyQ">
 
 </head>
-
+<script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <body>
-  <form id="song-form">
-    Song:<br>
-    <div class="qtable">
-      <input type="text" name="song" value="" class="row">
-      <button id="song-button" type="submit" class="row">Submit</button>
-    </div>
+  <div class="qtable">
+    <form id="song-form">
+      Song:<br>
+      <div class="qtable">
+        <input type="text" name="song" value="" class="row">
+        <button id="song-button" type="submit" class="row">Submit</button>
+      </div>
+      <form id="register-form">
+        <div class="qtable" id="register-div">
+          Username:<br>
+          <input type="text" name="username" value="" id="username-input" class="row">
+          <button id="username-button" type="submit" class="row">Submit</button>
+        </div>
+      </form>
+  </div>
   </form>
   <div id="response-text">
   </div>
@@ -121,6 +131,13 @@
       socket.send("inquire")
     }, 5000, socket)
 
+    $(function() {
+      if (Cookies.get("username")) 
+        $("#register-div").hide()
+      else 
+        $("register-div").show()
+    });
+
   </script>
   <style>
     .qtable:after {
@@ -158,6 +175,15 @@
     
     img {
       padding-right: 5px;
+    }
+
+    a:hover {
+      color: hotpink;
+    }
+
+    /* selected link */
+    a:active {
+      color: blue;
     }
 
   </style>

@@ -12,6 +12,16 @@ import youtube
 
 logger = log.get_logger(__name__)
 
+def spam_detector(request):
+    duplicates = db.get_by_videoid(request["videoId"])
+    print(duplicates)
+    queue = db.get_by_status("enqueue")
+    print(queue)
+    if len(queue) == 0 or (len(duplicates) / (len(queue) + 1) < 0.05 and queue[-1].get("videoId") != request["videoId"]):
+        return True 
+    return False
+
+
 @aiohttp_jinja2.template('index.html')
 async def getreq(request):
 	await get_session(request) # start or get session
@@ -39,20 +49,22 @@ async def add(request):
 		metadata = None
 		cache = session.get("cache")
 		if not cache:
-			if video_id == "undiefined":
+			if video_id == "undefined":
 				raise KeyError
 			cache = await youtube.search(video_id)
+		metadata = next(entry for entry in cache if entry.get("videoId"))
 		for entry in cache:
 			entry_video = entry.get('videoId')
 			if video_id == entry_video:
 				metadata = entry
 		if video_id and metadata and video_id != "undefined":
 			metadata["requestor"] = session.identity
-			Q.enqueue(metadata)
-			logger.info("Added song %s to queue", metadata["title"])
-			logger.debug(str(metadata))
-			db.add_song(metadata)
-			logger.info("Saved song metadata")
+			if spam_detector(metadata):
+				Q.enqueue(metadata)
+				logger.info("Added song %s to queue", metadata["title"])
+				logger.debug(str(metadata))
+			else:
+				return web.HTTPBadRequest(reason="Spam Detected")
 		return web.HTTPAccepted()
 	except KeyError as e:
 		logger.error("Key error")
@@ -65,11 +77,9 @@ async def QWatcher(request):
 	request.app["websockets"][session.identity] = resp
 	logger.info("creating new websocket")
 	await resp.prepare(request)
-	# results = db.get_by_status("enqueue")
 	await resp.send_json(Q.Q)
 	try:
 		async for _ in resp:
-			# results = db.get_by_status("enqueue")
 			await resp.send_json(Q.Q)
 		return resp
 	finally:
@@ -85,9 +95,8 @@ async def add_username(request):
 
 
 async def on_shutdown(app):
-	for ws in set(app.get('websockets', [])):
+	for ws in app['websockets'].values():
 		try:
 			await ws.close(code=WSCloseCode.GOING_AWAY, message='Server shutdown')
 		except Exception:
 			pass
-

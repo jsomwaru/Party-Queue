@@ -13,18 +13,26 @@ Q = []
 
 logger = log.get_logger(__name__)
 
-def enqueue(videoId):
-    Q.append(videoId)
+def enqueue(metadata):
+    db.add_song(metadata)
+    Q.append(metadata)
+
 
 def dequeue():
     if len(Q) > 0:
-        return Q.pop(0)
+        meta = Q.pop(0)
+        vid = meta["videoId"]
+        db.update_status(vid, "dequeue")
+        db.update_playing(vid, False)
+        return meta
     return None
+
 
 def peek() -> dict:
     if len(Q) > 0:
         return Q[0]
     return {}
+
 
 def download(vid):
     buffer = BytesIO()
@@ -34,23 +42,22 @@ def download(vid):
     buffer.seek(0)
     return buffer
 
+
 def partyQ():
     logger.info("Starting PartyQ")
     while 1:
         meta = peek()
         vid = meta.get("videoId")
         if vid:
-            # meta = db.get_metadata(vid)
-            # meta = meta.pop(0)
-            # db.update_playing(vid, True)
+            db.update_playing(vid, True)
             logger.info("Playing %s", meta["title"])
             buffer = download(vid)
             logger.info("Downloaded %s", meta["title"])
             sound = AudioSegment.from_file(buffer)
             play(sound)
-            # db.update_status(vid, "dequeue")
-            # db.update_playing(vid, False)
+            dequeue()
             del sound
             del buffer
             gc.collect()
-        time.sleep(1)
+        else:
+            time.sleep(1)

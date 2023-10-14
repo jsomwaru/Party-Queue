@@ -5,6 +5,7 @@ def get_db() -> sqlite3.Cursor:
     db = sqlite3.connect("media/q.db")
     return db
 
+
 def setup_db():
     db = sqlite3.connect("media/q.db")
     db.execute(
@@ -13,6 +14,7 @@ def setup_db():
     db.execute("CREATE TABLE IF NOT EXISTS Session(id, username)")
     db.commit()
     db.close()
+
 
 def add_song(metadata):
     db = sqlite3.connect("media/q.db")
@@ -24,33 +26,54 @@ def add_song(metadata):
     db.commit()
     db.close()
 
+
 def update_status(video_id, status):
     db = sqlite3.connect("media/q.db")
     db.execute(
-        "UPDATE Q set status = ? WHERE videoId = ?", (status, video_id))
+        "UPDATE Q set status = ? WHERE videoId = ?", 
+        (status, video_id)
+    )
     db.commit()
     db.close()
+
 
 def update_playing(video_id, playing):
     db = sqlite3.connect("media/q.db")
     db.execute(
-        "UPDATE Q set playing = ? WHERE videoId = ?", (playing, video_id))
+        "UPDATE Q set playing = ? WHERE videoId = ?", 
+        (playing, video_id)
+    )
     db.commit()
     db.close()
+
 
 def get_by_status(status):
     db = get_db()
     res = db.execute("SELECT * FROM Q WHERE status = ?", [status])
     return format_results(res.fetchall())
 
+
 def get_metadata(vid):
     db = get_db()
     res = db.execute("SELECT * from Q WHERE videoId = ?", [vid])
     return format_results(res.fetchall())
 
+def get_by_requestor(requestor):
+    db = get_db()
+    res = db.execute("SELECT * FROM Q WHERE requestor = ?", [requestor])
+    return format_results(res.fetchall())
+
+
+def get_by_videoid(vid):
+    db = get_db()
+    res = db.execute("SELECT * FROM Q WHERE videoId = ? AND status = 'enqueue' ", [vid])
+    return format_results(res.fetchall())
+
+
 def format_results(results):
     if len(results) > 0:
-        return [{
+        return [
+            {
                 "videoId": res[0],
                 "songName": res[1],
                 "requestor": res[2],
