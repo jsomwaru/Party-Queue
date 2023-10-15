@@ -12,10 +12,10 @@ import youtube
 
 logger = log.get_logger(__name__)
 
-def spam_detector(request):
-    duplicates = db.get_by_videoid(request["videoId"])
+def spam_detector(request: dict, q: Q.QM):
+    duplicates = q.get_by_videoid(request["videoId"])
     print(duplicates)
-    queue = db.get_by_status("enqueue")
+    queue = q.get_queue()
     print(queue)
     if len(queue) == 0 or (len(duplicates) / (len(queue) + 1) < 0.05 and queue[-1].get("videoId") != request["videoId"]):
         return True 
@@ -59,8 +59,8 @@ async def add(request):
 				metadata = entry
 		if video_id and metadata and video_id != "undefined":
 			metadata["requestor"] = session.identity
-			if spam_detector(metadata):
-				Q.enqueue(metadata)
+			if spam_detector(metadata, request.app["Q"]):
+				request.app["Q"].enqueue(metadata)
 				logger.info("Added song %s to queue", metadata["title"])
 				logger.debug(str(metadata))
 			else:
@@ -77,10 +77,10 @@ async def QWatcher(request):
 	request.app["websockets"][session.identity] = resp
 	logger.info("creating new websocket")
 	await resp.prepare(request)
-	await resp.send_json(Q.Q)
+	await resp.send_json(request.app["Q"].get_queue())
 	try:
 		async for _ in resp:
-			await resp.send_json(Q.Q)
+			await resp.send_json(request.app["Q"].get_queue())
 		return resp
 	finally:
 		logger.info("Client %s disconnected", session.identity)

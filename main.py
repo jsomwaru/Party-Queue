@@ -17,6 +17,7 @@ import Q
 
 
 async def main():
+	q = Q.QM()
 	app = web.Application()
 	aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader('templates'))
 	redis = await from_url("redis://127.0.0.1:6379")
@@ -33,12 +34,14 @@ async def main():
 	])
 	app.on_shutdown.append(routes.on_shutdown)
 	app["websockets"] = {}
+	app["Q"] = q
 	db.setup_db()
 	# await asyncio.gather(
 	#   web._run_app(app, host='0.0.0.0', port=80),
 	# 	asyncio.to_thread(Q.partyQ)
 	# )
-	partyq = asyncio.to_thread(Q.partyQ)
+
+	partyq = asyncio.to_thread(Q.partyQ, q)
 	task = asyncio.create_task(partyq)
 	app["partyq"] = task
 	return app
