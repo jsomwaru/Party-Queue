@@ -8,27 +8,64 @@
   <meta name="description" content="PartyQ">
 
 </head>
-
+<script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <body>
-  <form id="song-form">
-    Song:<br>
-    <input type="text" name="song" value=""><br><br>
-    <button id="song-button" type="submit">Submit</button>
+  <div class="qtable">
+    <form id="song-form">
+      Song:<br>
+      <div class="qtable">
+        <input type="text" name="song" value="" class="row">
+        <button id="song-button" type="submit" class="row">Submit</button>
+      </div>
+      <form id="register-form">
+        <div class="qtable" id="register-div">
+          Username:<br>
+          <input type="text" name="username" value="" id="username-input" class="row">
+          <button id="username-button" type="submit" class="row">Submit</button>
+        </div>
+      </form>
+  </div>
   </form>
   <div id="response-text">
   </div>
-  <div id="results">
+  <div id="qtable">
+    <div id="results" class="col">
+      <p>&nbsp;</p>
+    </div>
+    <div id="queue" class="col">
+      <!-- <p>Queue:</p> -->
+    </div>
   </div>
   <script>
+    function clearParent(parent) {
+      while (parent.firstChild) {
+        // if (parent.firstChild.tagName == "DIV")
+          parent.removeChild(parent.firstChild)
+      }
+    }
+
     function displayResults(results) {
       var resultlist = document.getElementById("results")
+      clearParent(resultlist)
       results.forEach((res) => {
           let listitem = document.createElement("div")
           let artistname = res.artists[0].name 
-          // let thumbnail = res.thumbnails[0].url
-          listitem.innerHTML = `${artistname} - ${res.title}`
+          let thumbnail = res.thumbnails[0].url
+          let img = document.createElement("img")
+          img.setAttribute("src", thumbnail)
+          img.setAttribute("class", "result-list")
+          img.setAttribute("height", "50px")
+          img.setAttribute("width", "50px")
+          let title = document.createElement("p")
+          title.setAttribute("class", "result-list")
+          title.innerHTML = `${artistname} - ${res.title}`
+          title.setAttribute("videoId", res.videoId)
+          img.setAttribute("videoId", res.videoId)
           listitem.setAttribute("videoId", res.videoId)
           let link = document.createElement("a")
+          listitem.appendChild(img)
+          listitem.appendChild(title)
           link.appendChild(listitem)
           resultlist.appendChild(link)
           link.addEventListener("click", (e) => {
@@ -49,7 +86,7 @@
     function sendData(e) {
       e.preventDefault()
       var formData = new FormData(e.target)
-      console.log(Object.fromEntries(formData))
+      var req = Object.fromEntries(formData)
       fetch(window.origin, {
         method: "post",
         body: formData
@@ -58,7 +95,7 @@
           response_text.innerHTML = "There was an error submitting song request"
         }
         else {
-          response_text.innerHTML = "Song Submitted"
+          response_text.innerHTML = `Results for "${req.song}":`
           return res
         }
       })
@@ -72,6 +109,83 @@
     }
 
     form.addEventListener("submit", sendData)
+    const socket = new WebSocket(`ws://${window.location.hostname}/qinfo`)
+
+    socket.addEventListener("open", (event) => {
+      console.log("socket open")
+    })
+
+    socket.addEventListener("message", (event) => {
+      console.log("Message from server ", event.data);
+      var qdiv = document.getElementById("queue")
+      var qdata = JSON.parse(event.data)
+      clearParent(qdiv)
+      qdata.forEach((res) => {
+        let elm = document.createElement("div")
+        elm.innerText = `${res.title}`
+        qdiv.appendChild(elm)
+      })
+    })
+
+    setInterval((socket) => {
+      socket.send("inquire")
+    }, 5000, socket)
+
+    $(function() {
+      if (Cookies.get("username")) 
+        $("#register-div").hide()
+      else 
+        $("register-div").show()
+    });
+
   </script>
-</body>
+  <style>
+    .qtable:after {
+      content: "";
+      display: table;
+      clear: both;
+    }
+
+    .row {
+      float: left;
+    }
+
+    .col {
+      float: left;
+      width: 50%;
+    };
+
+    #response-text {
+      align-content: center;
+      margin: auto;
+      /* width: 50%; */
+      padding: 10px;
+      width:250px; /* or whatever width you want. */
+      max-width:250px;
+    }
+
+    body {
+      font-family: monospace;
+      font-size: large;
+    }
+
+    .result-list {
+      display: inline-block;
+    }
+    
+    img {
+      padding-right: 5px;
+    }
+
+    a:hover {
+      color: hotpink;
+    }
+
+    /* selected link */
+    a:active {
+      color: blue;
+    }
+
+  </style>
+  </body>
 </html>

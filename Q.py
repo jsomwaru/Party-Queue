@@ -1,43 +1,63 @@
+import gc
+import time
 from io import BytesIO
-
-import pyaudio
-
-import youtube
 
 from pydub import AudioSegment
 from pydub.playback import play
 
-from pyogg import OpusDecoder
+import db
+import logger as log
+import youtube
 
 Q = []
 
-def enqueue(video_id):
-    Q.append(video_id)
-    print(Q)
+logger = log.get_logger(__name__)
+
+def enqueue(metadata):
+    db.add_song(metadata)
+    Q.append(metadata)
+
 
 def dequeue():
     if len(Q) > 0:
-        return Q.pop(0)
+        meta = Q.pop(0)
+        vid = meta["videoId"]
+        db.update_status(vid, "dequeue")
+        db.update_playing(vid, False)
+        return meta
     return None
 
 
+def peek() -> dict:
+    if len(Q) > 0:
+        return Q[0]
+    return {}
+
+
+def download(vid):
+    buffer = BytesIO()
+    yt = youtube.YTClient(vid)
+    yt.get_best_audio_stream()
+    yt.cur_stream.stream_to_buffer(buffer)
+    buffer.seek(0)
+    return buffer
+
+
 def partyQ():
-    CHUNK = 1000
-    p = pyaudio.PyAudio()
-    print("starting partyq")
-    opus_decoder = OpusDecoder()
-    opus_decoder.set_channels(2)
-    opus_decoder.set_sampling_frequency(48000)
+    logger.info("Starting PartyQ")
     while 1:
-        vid = dequeue()
+        meta = peek()
+        vid = meta.get("videoId")
         if vid:
-            print(f"playing {vid}")
-            yt = youtube.YTClient(vid)
-            yt.get_best_audio_stream()
-            buffer = BytesIO()
-            yt.cur_stream.stream_to_buffer(buffer)
-         
-            buffer.seek(0)
+            db.update_playing(vid, True)
+            logger.info("Playing %s", meta["title"])
+            buffer = download(vid)
+            logger.info("Downloaded %s", meta["title"])
             sound = AudioSegment.from_file(buffer)
             play(sound)
-
+            dequeue()
+            del sound
+            del buffer
+            gc.collect()
+        else:
+            time.sleep(1)
