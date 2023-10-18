@@ -1,5 +1,10 @@
 import sqlite3
 
+"""
+Keeping DB around to explore possible options for rate limiting
+But this is mostly unused
+"""
+
 
 def get_db() -> sqlite3.Cursor:
     db = sqlite3.connect("media/q.db")

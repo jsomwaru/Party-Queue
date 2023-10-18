@@ -11,11 +11,14 @@ import youtube
 
 Q = []
 
+logger = log.get_logger(__name__)
+
 class QM:
     def __init__(self):
         self._q = []
 
     def enqueue(self, metadata):
+        logger.info("enqueue %s", str(metadata))
         self._q.append(metadata)
 
     def dequeue(self):
@@ -37,36 +40,13 @@ class QM:
     def peek(self):
         if len(self._q):
             return self._q[0]
-        return None
+        return {}
     
     def get_by_videoid(self, vid):
         return [ entry for entry in self._q 
             if entry["videoId"] == vid
         ]
     
-
-logger = log.get_logger(__name__)
-
-def enqueue(metadata):
-    db.add_song(metadata)
-    Q.append(metadata)
-
-
-def dequeue():
-    if len(Q) > 0:
-        meta = Q.pop(0)
-        vid = meta["videoId"]
-        db.update_status(vid, "dequeue")
-        db.update_playing(vid, False)
-        return meta
-    return None
-
-
-def peek() -> dict:
-    if len(Q) > 0:
-        return Q[0]
-    return {}
-
 
 def download(vid):
     buffer = BytesIO()
@@ -82,9 +62,7 @@ def partyQ(q: QM):
     while 1:
         meta = q.peek()
         vid = meta.get("videoId")
-        print(vid)
         if vid:
-            # db.update_playing(vid, True)
             logger.info("Playing %s", meta["title"])
             buffer = download(vid)
             logger.info("Downloaded %s", meta["title"])
@@ -96,3 +74,4 @@ def partyQ(q: QM):
             gc.collect()
         else:
             time.sleep(1)
+    logger.info("End of PartyQ")

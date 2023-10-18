@@ -14,9 +14,8 @@ logger = log.get_logger(__name__)
 
 def spam_detector(request: dict, q: Q.QM):
     duplicates = q.get_by_videoid(request["videoId"])
-    print(duplicates)
     queue = q.get_queue()
-    print(queue)
+    logger.info("Found %d duplicates", len(duplicates))
     if len(queue) == 0 or (len(duplicates) / (len(queue) + 1) < 0.05 and queue[-1].get("videoId") != request["videoId"]):
         return True 
     return False
