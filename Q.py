@@ -9,8 +9,6 @@ import db
 import logger as log
 import youtube
 
-Q = []
-
 logger = log.get_logger(__name__)
 
 class QM:
