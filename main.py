@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 import asyncio
 
-from datetime import timedelta
-
 import aiohttp_jinja2
 import jinja2
 from aiohttp import web
@@ -15,14 +13,11 @@ import routes
 import Q
 
 
-
 async def main():
 	q = Q.QM()
 	app = web.Application()
 	aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader('templates'))
 	redis = await from_url("redis://127.0.0.1:6379")
-	print(timedelta(days=30).seconds)
-	# storage = RedisStorage(redis, max_age=int(timedelta(days=30).seconds))
 	storage = RedisStorage(redis)
 	setup(app, storage)
 	app.add_routes([
@@ -36,10 +31,6 @@ async def main():
 	app["websockets"] = {}
 	app["Q"] = q
 	db.setup_db()
-	# await asyncio.gather(
-	#   web._run_app(app, host='0.0.0.0', port=80),
-	# 	asyncio.to_thread(Q.partyQ)
-	# )
 
 	partyq = asyncio.to_thread(Q.partyQ, q)
 	task = asyncio.create_task(partyq)

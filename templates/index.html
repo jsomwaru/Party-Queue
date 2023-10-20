@@ -14,19 +14,20 @@
   <div class="qtable">
     <form id="song-form">
       Song:<br>
-      <div class="qtable">
+      <div class="col">
         <input type="text" name="song" value="" class="row">
         <button id="song-button" type="submit" class="row">Submit</button>
       </div>
-      <form id="register-form">
-        <div class="qtable" id="register-div">
-          Username:<br>
-          <input type="text" name="username" value="" id="username-input" class="row">
-          <button id="username-button" type="submit" class="row">Submit</button>
-        </div>
-      </form>
+    </form>
+    <form id="register-form">
+      <div class="col" id="register-div">
+        Username:<br>
+        <input type="text" name="username" value="" id="username-input" class="row">
+        <button id="username-button" type="submit" class="row">Submit</button>
+      </div>
+    </form>
   </div>
-  </form>
+  <p id="username"></p>      
   <div id="response-text">
   </div>
   <div id="qtable">
@@ -131,12 +132,57 @@
       socket.send("inquire")
     }, 5000, socket)
 
-    $(function() {
-      if (Cookies.get("username")) 
-        $("#register-div").hide()
-      else 
-        $("register-div").show()
-    });
+    // $(function() {
+    //   if (Cookies.get("username")) 
+    //     $("#register-div").hide()
+    //   else 
+    //     $("register-div").show()
+    // });
+
+    var registerForm = document.getElementById("register-form")
+
+    function func(e) {
+      e.preventDefault();
+      let formData = new FormData(e.target)
+      var req = Object.fromEntries(formData)
+      let formInputs = e.target.getElementsByTagName("input")
+      fetch(`${window.origin}/setuser`, {
+        method: "POST",
+        body: formData
+      }).then((res) => {
+        if (res.ok) {
+          $("#username").text(req.username)
+        } else {
+          $("#username").text("err")
+        }
+      });
+      for(let i = 0; i < formInputs.length; ++i) {
+        formInputs[i].value = ""
+      }
+    }
+
+    registerForm.addEventListener("submit", func)
+
+
+    // $("#register-form").on("submit", (e) => {
+    //   let formData = new FormData(e.target)
+    //   var req = Object.fromEntries(formData)
+    //   let formInputs = e.target.getElementsByTagName("input")
+    //   fetch(`${window.origin}/setuser`, {
+    //     method: "POST",
+    //     body: formData
+    //   }).then((res) => {
+    //     if (res.ok) {
+    //       $("#username").text(req.username)
+    //     } else {
+    //       $("#username").text("err")
+    //     }
+    //   });
+    //   for(let i = 0; i < formInputs.length; ++i) {
+    //     formInputs[i].value = ""
+    //   }
+    //   e.preventDefault();
+    // })
 
   </script>
   <style>

@@ -4,7 +4,6 @@ from aiohttp.web_ws import WebSocketResponse
 from aiohttp import WSCloseCode
 from aiohttp_session import get_session
 
-import db
 import logger as log
 import Q
 import youtube
@@ -74,7 +73,7 @@ async def QWatcher(request):
 	session = await get_session(request)
 	resp = WebSocketResponse()
 	request.app["websockets"][session.identity] = resp
-	logger.info("creating new websocket")
+	logger.info("Creating new websocket")
 	await resp.prepare(request)
 	await resp.send_json(request.app["Q"].get_queue())
 	try:
@@ -87,10 +86,16 @@ async def QWatcher(request):
 
 
 async def add_username(request):
-	session = await get_session(request)
-	data = await request.post()
-	username = data["username"]
-	db.add_session(session, username)
+    session = await get_session(request)
+    try:
+        data = await request.post()
+        username = data["username"]
+        session["username"] = username
+        logger.info("username %s", username)
+        return web.HTTPAccepted()
+    except Exception as e:
+        logger.error("ERROR while submmiting log %s", e)
+        raise web.HTTPInternalServerError(text="An error occured") from e
 
 
 async def on_shutdown(app):
