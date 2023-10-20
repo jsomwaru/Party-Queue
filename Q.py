@@ -5,7 +5,6 @@ from io import BytesIO
 from pydub import AudioSegment
 from pydub.playback import play
 
-import db
 import logger as log
 import youtube
 

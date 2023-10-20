@@ -92,6 +92,6 @@ def format_results(results):
 def add_session(session, username):
     if session.created:
         db = get_db()
-        db.execute("INSERT INTO Session (?,?)", [session.idenity, username])
+        db.execute("INSERT INTO Session VALUES (?,?)", [session.identity, username])
         db.commit()
         db.close()
