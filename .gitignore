@@ -4,3 +4,4 @@ browser.json
 *.mp4
 *.wav
 media/*
+.vscode/
