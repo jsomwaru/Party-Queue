@@ -56,7 +56,7 @@ async def add(request):
 			if video_id == entry_video:
 				metadata = entry
 		if video_id and metadata and video_id != "undefined":
-			metadata["requestor"] = session.identity
+			metadata["requestor"] = session.get("username", session.identity)
 			if spam_detector(metadata, request.app["Q"]):
 				request.app["Q"].enqueue(metadata)
 				logger.info("Added song %s to queue", metadata["title"])
@@ -92,7 +92,9 @@ async def add_username(request):
         username = data["username"]
         session["username"] = username
         logger.info("username %s", username)
-        return web.HTTPAccepted()
+        resp = web.HTTPAccepted()
+        resp.set_cookie("username", "1")
+        return resp
     except Exception as e:
         logger.error("ERROR while submmiting log %s", e)
         raise web.HTTPInternalServerError(text="An error occured") from e

@@ -123,7 +123,7 @@
       clearParent(qdiv)
       qdata.forEach((res) => {
         let elm = document.createElement("div")
-        elm.innerText = `${res.artists[0].name} - ${res.title}`
+        elm.innerText = `${res.artists[0].name} - ${res.title}\n Requested by: ${res.requestor}`
         qdiv.appendChild(elm)
       })
     })
@@ -132,12 +132,12 @@
       socket.send("inquire")
     }, 5000, socket)
 
-    // $(function() {
-    //   if (Cookies.get("username")) 
-    //     $("#register-div").hide()
-    //   else 
-    //     $("register-div").show()
-    // });
+    $(function() {
+      if (Cookies.get("username")) 
+        $("#register-div").hide()
+      else 
+        $("register-div").show()
+    });
 
     var registerForm = document.getElementById("register-form")
 
@@ -163,26 +163,6 @@
 
     registerForm.addEventListener("submit", func)
 
-
-    // $("#register-form").on("submit", (e) => {
-    //   let formData = new FormData(e.target)
-    //   var req = Object.fromEntries(formData)
-    //   let formInputs = e.target.getElementsByTagName("input")
-    //   fetch(`${window.origin}/setuser`, {
-    //     method: "POST",
-    //     body: formData
-    //   }).then((res) => {
-    //     if (res.ok) {
-    //       $("#username").text(req.username)
-    //     } else {
-    //       $("#username").text("err")
-    //     }
-    //   });
-    //   for(let i = 0; i < formInputs.length; ++i) {
-    //     formInputs[i].value = ""
-    //   }
-    //   e.preventDefault();
-    // })
 
   </script>
   <style>
