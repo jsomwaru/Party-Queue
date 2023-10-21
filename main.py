@@ -8,7 +8,6 @@ from aiohttp_session import setup
 from aiohttp_session.redis_storage import RedisStorage
 from redis.asyncio import from_url
 
-import db
 import routes
 import Q
 
@@ -30,7 +29,6 @@ async def main():
 	app.on_shutdown.append(routes.on_shutdown)
 	app["websockets"] = {}
 	app["Q"] = q
-	db.setup_db()
 
 	partyq = asyncio.to_thread(Q.partyQ, q)
 	task = asyncio.create_task(partyq)

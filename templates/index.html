@@ -11,19 +11,19 @@
 <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <body>
-  <div class="qtable">
-    <form id="song-form">
+  <div class="top-row">
+    <form id="song-form" class="top-col">
       Song:<br>
-      <div class="col">
-        <input type="text" name="song" value="" class="row">
-        <button id="song-button" type="submit" class="row">Submit</button>
+      <div class="top-col">
+        <input type="text" name="song" value="" >
+        <button id="song-button" type="submit" >Submit</button>
       </div>
     </form>
-    <form id="register-form">
-      <div class="col" id="register-div">
+    <form id="register-form"  class="top-col">
+      <div class="top-col" id="register-div">
         Username:<br>
-        <input type="text" name="username" value="" id="username-input" class="row">
-        <button id="username-button" type="submit" class="row">Submit</button>
+        <input type="text" name="username" value="" id="username-input" >
+        <button id="username-button" type="submit" >Submit</button>
       </div>
     </form>
   </div>
@@ -123,7 +123,7 @@
       clearParent(qdiv)
       qdata.forEach((res) => {
         let elm = document.createElement("div")
-        elm.innerText = `${res.title}`
+        elm.innerText = `${res.artists[0].name} - ${res.title}`
         qdiv.appendChild(elm)
       })
     })
@@ -186,6 +186,21 @@
 
   </script>
   <style>
+
+
+    .top-row {
+      display: table;
+     /* float: left; */
+      width: 100%; 
+      clear: both;
+    }
+    
+  .top-col {
+      /* float: left; */
+      width: 50%;
+      display: table-cell;
+    }
+
     .qtable:after {
       content: "";
       display: table;
