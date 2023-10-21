@@ -24,7 +24,8 @@ async def main():
 		web.post('/', routes.songreq),
 		web.post('/add', routes.add),
 		web.get('/qinfo', routes.QWatcher),
-		web.post('/setuser', routes.add_username)
+		web.post('/setuser', routes.add_username),
+		web.static('/static', "static")
 	])
 	app.on_shutdown.append(routes.on_shutdown)
 	app["websockets"] = {}
