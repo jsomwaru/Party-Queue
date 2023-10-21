@@ -4,7 +4,6 @@ from aiohttp.web_ws import WebSocketResponse
 from aiohttp import WSCloseCode
 from aiohttp_session import get_session
 
-import db
 import logger as log
 import Q
 import youtube
@@ -12,11 +11,10 @@ import youtube
 
 logger = log.get_logger(__name__)
 
-def spam_detector(request):
-    duplicates = db.get_by_videoid(request["videoId"])
-    print(duplicates)
-    queue = db.get_by_status("enqueue")
-    print(queue)
+def spam_detector(request: dict, q: Q.QM):
+    duplicates = q.get_by_videoid(request["videoId"])
+    queue = q.get_queue()
+    logger.info("Found %d duplicates", len(duplicates))
     if len(queue) == 0 or (len(duplicates) / (len(queue) + 1) < 0.05 and queue[-1].get("videoId") != request["videoId"]):
         return True 
     return False
@@ -58,9 +56,9 @@ async def add(request):
 			if video_id == entry_video:
 				metadata = entry
 		if video_id and metadata and video_id != "undefined":
-			metadata["requestor"] = session.identity
-			if spam_detector(metadata):
-				Q.enqueue(metadata)
+			metadata["requestor"] = session.get("username", session.identity)
+			if spam_detector(metadata, request.app["Q"]):
+				request.app["Q"].enqueue(metadata)
 				logger.info("Added song %s to queue", metadata["title"])
 				logger.debug(str(metadata))
 			else:
@@ -75,12 +73,12 @@ async def QWatcher(request):
 	session = await get_session(request)
 	resp = WebSocketResponse()
 	request.app["websockets"][session.identity] = resp
-	logger.info("creating new websocket")
+	logger.info("Creating new websocket")
 	await resp.prepare(request)
-	await resp.send_json(Q.Q)
+	await resp.send_json(request.app["Q"].get_queue())
 	try:
 		async for _ in resp:
-			await resp.send_json(Q.Q)
+			await resp.send_json(request.app["Q"].get_queue())
 		return resp
 	finally:
 		logger.info("Client %s disconnected", session.identity)
@@ -88,10 +86,18 @@ async def QWatcher(request):
 
 
 async def add_username(request):
-	session = await get_session(request)
-	data = await request.post()
-	username = data["username"]
-	db.add_session(session, username)
+    session = await get_session(request)
+    try:
+        data = await request.post()
+        username = data["username"]
+        session["username"] = username
+        logger.info("username %s", username)
+        resp = web.HTTPAccepted()
+        resp.set_cookie("username", "1")
+        return resp
+    except Exception as e:
+        logger.error("ERROR while submmiting log %s", e)
+        raise web.HTTPInternalServerError(text="An error occured") from e
 
 
 async def on_shutdown(app):

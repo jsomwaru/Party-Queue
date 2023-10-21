@@ -5,34 +5,45 @@ from io import BytesIO
 from pydub import AudioSegment
 from pydub.playback import play
 
-import db
 import logger as log
 import youtube
 
-Q = []
-
 logger = log.get_logger(__name__)
 
-def enqueue(metadata):
-    db.add_song(metadata)
-    Q.append(metadata)
+class QM:
+    def __init__(self):
+        self._q = []
 
+    def enqueue(self, metadata):
+        logger.info("enqueue %s", str(metadata))
+        self._q.append(metadata)
 
-def dequeue():
-    if len(Q) > 0:
-        meta = Q.pop(0)
-        vid = meta["videoId"]
-        db.update_status(vid, "dequeue")
-        db.update_playing(vid, False)
-        return meta
-    return None
-
-
-def peek() -> dict:
-    if len(Q) > 0:
-        return Q[0]
-    return {}
-
+    def dequeue(self):
+        if len(self._q):
+            return self._q.pop(0)
+        return None
+    
+    def get_queue(self, filter=set()):
+        if not len(filter):
+            return self._q
+        ret = []
+        for v in self._q:
+            entry = {}
+            for k in filter:
+                entry[k] = v.get(k)
+            ret.append(entry)
+        return ret
+    
+    def peek(self):
+        if len(self._q):
+            return self._q[0]
+        return {}
+    
+    def get_by_videoid(self, vid):
+        return [ entry for entry in self._q 
+            if entry["videoId"] == vid
+        ]
+    
 
 def download(vid):
     buffer = BytesIO()
@@ -43,21 +54,21 @@ def download(vid):
     return buffer
 
 
-def partyQ():
+def partyQ(q: QM):
     logger.info("Starting PartyQ")
     while 1:
-        meta = peek()
+        meta = q.peek()
         vid = meta.get("videoId")
         if vid:
-            db.update_playing(vid, True)
             logger.info("Playing %s", meta["title"])
             buffer = download(vid)
             logger.info("Downloaded %s", meta["title"])
             sound = AudioSegment.from_file(buffer)
             play(sound)
-            dequeue()
+            q.dequeue()
             del sound
             del buffer
             gc.collect()
         else:
             time.sleep(1)
+    logger.info("End of PartyQ")

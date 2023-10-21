@@ -10,5 +10,4 @@ else
     docker restart $id
 fi
 popd
-rm media/q.db
 adev runserver main.py --host 0.0.0.0 --port 80 --app-factory main   
