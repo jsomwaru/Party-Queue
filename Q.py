@@ -15,7 +15,7 @@ class QM:
         self._q = []
 
     def enqueue(self, metadata):
-        logger.info("enqueue %s", str(metadata))
+        logger.debug("enqueue %s", str(metadata))
         self._q.append(metadata)
 
     def dequeue(self):
