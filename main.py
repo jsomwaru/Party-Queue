@@ -25,6 +25,7 @@ async def main():
 		web.post('/add', routes.add),
 		web.get('/qinfo', routes.QWatcher),
 		web.post('/setuser', routes.add_username),
+		web.get('/toggle', routes.toggle_playing),
 		web.static('/static', "static")
 	])
 	app.on_shutdown.append(routes.on_shutdown)

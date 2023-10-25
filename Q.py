@@ -1,7 +1,10 @@
 import gc
 import time
+import threading
 from io import BytesIO
 
+from pyaudio import PyAudio
+from pydub.utils import make_chunks
 from pydub import AudioSegment
 from pydub.playback import play
 
@@ -9,6 +12,8 @@ import logger as log
 import youtube
 
 logger = log.get_logger(__name__)
+
+CONTROL = threading.Event()
 
 class QM:
     def __init__(self):
@@ -54,17 +59,36 @@ def download(vid):
     return buffer
 
 
+def play_pyaudio(seg):
+    p = PyAudio()
+    stream = p.open(format=p.get_format_from_width(seg.sample_width),
+                    channels=seg.channels,
+                    rate=seg.frame_rate,
+                    output=True
+            )
+    try:
+        CONTROL.set()
+        for frames in make_chunks(seg, 500):
+            stream.write(frames._data)
+            CONTROL.wait()
+    finally:
+        stream.stop_stream()
+        stream.close()
+        p.terminate()
+
+
 def partyQ(q: QM):
     logger.info("Starting PartyQ")
     while 1:
         meta = q.peek()
         vid = meta.get("videoId")
         if vid:
+            duration = meta.get("duration_seconds")
             logger.info("Playing %s", meta["title"])
             buffer = download(vid)
             logger.info("Downloaded %s", meta["title"])
             sound = AudioSegment.from_file(buffer)
-            play(sound)
+            play_pyaudio(sound)
             q.dequeue()
             del sound
             del buffer
