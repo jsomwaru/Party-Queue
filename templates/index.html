@@ -26,6 +26,7 @@
         <button id="username-button" type="submit" >Submit</button>
       </div>
     </form>
+    <button id="pause-button">Pause</button>
   </div>
   <p id="username"></p>      
   <div id="response-text">
@@ -45,6 +46,13 @@
           parent.removeChild(parent.firstChild)
       }
     }
+
+    $("#pause-button").on("click", (e) => {
+      e.preventDefault();
+      fetch(`${window.origin}/toggle`, {
+        method: "get"
+      })
+    })
 
     function displayResults(results) {
       var resultlist = document.getElementById("results")
