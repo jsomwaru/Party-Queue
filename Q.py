@@ -6,7 +6,6 @@ from io import BytesIO
 from pyaudio import PyAudio
 from pydub.utils import make_chunks
 from pydub import AudioSegment
-from pydub.playback import play
 
 import logger as log
 import youtube
@@ -65,12 +64,12 @@ def play_pyaudio(seg):
                     channels=seg.channels,
                     rate=seg.frame_rate,
                     output=True
-            )
+                )
     try:
         CONTROL.set()
         for frames in make_chunks(seg, 500):
             stream.write(frames._data)
-            CONTROL.wait()
+            CONTROL.wait() # If not set thread will pause here
     finally:
         stream.stop_stream()
         stream.close()
