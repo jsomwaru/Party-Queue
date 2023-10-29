@@ -126,3 +126,13 @@ async def remove(request: web.Request):
     except Exception as e:
         logger.error(e)
         return web.HTTPError(text="Failure to remove")
+
+@web.middleware
+async def unset_cookies(request, handler):
+    resp: web.HTTPAccepted = await handler(request)
+    session = await get_session(request)
+    username = session.get("username")
+    if not username:
+        resp.del_cookie("username")
+    return resp
+	

@@ -4,7 +4,7 @@ import asyncio
 import aiohttp_jinja2
 import jinja2
 from aiohttp import web
-from aiohttp_session import setup
+from aiohttp_session import setup, session_middleware
 from aiohttp_session.redis_storage import RedisStorage
 from redis.asyncio import from_url
 
@@ -19,6 +19,7 @@ async def main():
 	redis = await from_url("redis://127.0.0.1:6379")
 	storage = RedisStorage(redis)
 	setup(app, storage)
+	app.middlewares.append(routes.unset_cookies)
 	app.add_routes([
 		web.get('/', routes.getreq), 
 		web.post('/', routes.songreq),
