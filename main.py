@@ -26,7 +26,7 @@ async def main():
 		web.get('/qinfo', routes.QWatcher),
 		web.post('/setuser', routes.add_username),
 		web.get('/toggle', routes.toggle_playing),
-		web.delete("/remove/{qpos}", routes.remove), 
+		web.delete("/remove/{qpos:\d+}", routes.remove), 
 		web.static('/static', "static")
 	])
 	app.on_shutdown.append(routes.on_shutdown)
