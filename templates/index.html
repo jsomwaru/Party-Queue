@@ -40,9 +40,27 @@
     </div>
   </div>
   <script>
+    var song = {}
+    var current_song = new Proxy(song, {
+      set: (target, key, value) => {
+        target.ref = $("#queue")[0].firstChild
+        target[key] = value
+        return true
+      }
+    })
+
+    setInterval((e) => {
+      if (song) {
+        song.pos += 1
+        if(song.ref) {
+          song.ref.innerHTML = `${song.ref.innerText} - ${song.pos}/${song.duration_seconds}`
+        }
+      }
+    }, 1)
+
     function clearParent(parent) {
       while (parent.firstChild) {
-        // if (parent.firstChild.tagName == "DIV")
+        // if (parent.firstChild.tagName === "DIV")
           parent.removeChild(parent.firstChild)
       }
     }
@@ -134,8 +152,13 @@
         elm.innerText = `${res.artists[0].name} - ${res.title}\n Requested by: ${res.requestor}`
         qdiv.appendChild(elm)
       })
+      if (qdata.length > 0) {
+        current_song = qdata[0]
+        current_song.ref = $("#queue")[0].firstChild
+      }
     })
-
+  
+    
     setInterval((socket) => {
       socket.send("inquire")
     }, 5000, socket)

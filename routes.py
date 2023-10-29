@@ -56,7 +56,7 @@ async def add(request):
 			if video_id == entry_video:
 				metadata = entry
 		if video_id and metadata and video_id != "undefined":
-			metadata["requestor"] = session.get("username", session.identity)
+			metadata["requestor"] = session.get("username", "anonymous")
 			if spam_detector(metadata, request.app["Q"]):
 				request.app["Q"].enqueue(metadata)
 				logger.info("Added song %s to queue", metadata["title"])
@@ -117,3 +117,12 @@ async def on_shutdown(app):
 			await ws.close(code=WSCloseCode.GOING_AWAY, message='Server shutdown')
 		except Exception:
 			pass
+
+async def remove(request: web.Request):
+    try:
+        qpos = request.match_info["qpos"]
+        request.app["Q"].remove(int(qpos))
+        return web.HTTPAccepted()
+    except Exception as e:
+        logger.error(e)
+        return web.HTTPError(text="Failure to remove")

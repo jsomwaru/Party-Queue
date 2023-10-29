@@ -20,6 +20,7 @@ class QM:
 
     def enqueue(self, metadata):
         logger.debug("enqueue %s", str(metadata))
+        metadata["pos"] = 0
         self._q.append(metadata)
 
     def dequeue(self):
@@ -48,6 +49,13 @@ class QM:
             if entry["videoId"] == vid
         ]
     
+    def time_callback(self, t):
+        self.peek()["pos"] += (t / 1000)
+
+    def remove(self, qpos):
+        if qpos and qpos < len(self._q) and qpos > 0:
+            del self._q[qpos]
+    
 
 def download(vid):
     buffer = BytesIO()
@@ -58,7 +66,7 @@ def download(vid):
     return buffer
 
 
-def play_pyaudio(seg):
+def play_pyaudio(seg, time_callback):
     p = PyAudio()
     stream = p.open(format=p.get_format_from_width(seg.sample_width),
                     channels=seg.channels,
@@ -67,8 +75,10 @@ def play_pyaudio(seg):
                 )
     try:
         CONTROL.set()
-        for frames in make_chunks(seg, 500):
+        duration = 500
+        for frames in make_chunks(seg, duration):
             stream.write(frames._data)
+            time_callback(duration)
             CONTROL.wait() # If not set thread will pause here
     finally:
         stream.stop_stream()
@@ -77,17 +87,16 @@ def play_pyaudio(seg):
 
 
 def partyQ(q: QM):
-    logger.info("Starting PartyQ")
+    logger.info("Starting PartyQ") 
     while 1:
         meta = q.peek()
         vid = meta.get("videoId")
         if vid:
-            duration = meta.get("duration_seconds")
             logger.info("Playing %s", meta["title"])
             buffer = download(vid)
             logger.info("Downloaded %s", meta["title"])
             sound = AudioSegment.from_file(buffer)
-            play_pyaudio(sound)
+            play_pyaudio(sound, q.time_callback)
             q.dequeue()
             del sound
             del buffer
