@@ -33,7 +33,8 @@ async def songreq(request):
 		session = await get_session(request)
 		song =	data['song']
 		results = await youtube.search(song)
-		session["cache"] = [res for res in results if "videoId" in list(res.keys())]
+		results = [res for res in results if "videoId" in list(res.keys())]
+		session["cache"] = results
 		return web.json_response(results)
 	except KeyError as e:
 		raise web.HTTPBadRequest(text = 'Enter a song') from e
@@ -108,7 +109,7 @@ async def toggle_playing(request):
 	else: # Play
 		Q.CONTROL.set()
 		logger.info("%s started the Q", session.get("username", session.identity))
-		return web.HTTPAccepted(text="play")
+		return web.HTTPAccepted(text="Play")
 
 
 async def on_shutdown(app):

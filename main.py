@@ -4,7 +4,7 @@ import asyncio
 import aiohttp_jinja2
 import jinja2
 from aiohttp import web
-from aiohttp_session import setup, session_middleware
+from aiohttp_session import setup
 from aiohttp_session.redis_storage import RedisStorage
 from redis.asyncio import from_url
 

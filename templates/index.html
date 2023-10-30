@@ -43,6 +43,7 @@
     var song = {}
     var current_song = new Proxy(song, {
       set: (target, key, value) => {
+        console.log("set")
         target.ref = $("#queue")[0].firstChild
         target[key] = value
         return true
@@ -50,13 +51,13 @@
     })
 
     setInterval((e) => {
-      if (song) {
-        song.pos += 1
+      if (song.cur) {
+        song.cur.pos += 1
         if(song.ref) {
-          song.ref.innerHTML = `${song.ref.innerText} - ${song.pos}/${song.duration_seconds}`
+          $("#timing-info").text(`${Math.floor(song.cur.pos)}/${song.cur.duration_seconds}`)
         }
       }
-    }, 1)
+    }, 1000)
 
     function clearParent(parent) {
       while (parent.firstChild) {
@@ -69,6 +70,11 @@
       e.preventDefault();
       fetch(`${window.origin}/toggle`, {
         method: "get"
+      }).then((res) => {
+        if (res.ok)
+          res.text().then((text) => {
+            e.target.innerText = text
+          })
       })
     })
 
@@ -153,12 +159,16 @@
         qdiv.appendChild(elm)
       })
       if (qdata.length > 0) {
-        current_song = qdata[0]
+        console.log("queuedata", qdata[0])
+        current_song.cur = qdata[0]
         current_song.ref = $("#queue")[0].firstChild
+        var timing_p = document.createElement("p")
+        timing_p.setAttribute("id", "timing-info")
+        current_song.ref.appendChild(timing_p)
       }
     })
   
-    
+
     setInterval((socket) => {
       socket.send("inquire")
     }, 5000, socket)
