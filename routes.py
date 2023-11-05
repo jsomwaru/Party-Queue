@@ -105,11 +105,11 @@ async def toggle_playing(request):
 	if Q.CONTROL.is_set(): # Pause
 		Q.CONTROL.clear()
 		logger.info("%s paused the Q", session.get("username", session.identity))
-		return web.HTTPAccepted(text="Pause")
+		return web.HTTPAccepted(text="Play")
 	else: # Play
 		Q.CONTROL.set()
 		logger.info("%s started the Q", session.get("username", session.identity))
-		return web.HTTPAccepted(text="Play")
+		return web.HTTPAccepted(text="Pause")
 
 
 async def on_shutdown(app):
