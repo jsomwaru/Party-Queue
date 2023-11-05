@@ -43,7 +43,7 @@
     var song = {}
     var current_song = new Proxy(song, {
       set: (target, key, value) => {
-        console.log("set")
+        // console.log("set")
         target.ref = $("#queue")[0].firstChild
         target[key] = value
         return true
@@ -151,22 +151,42 @@
     socket.addEventListener("message", (event) => {
       console.log("Message from server ", event.data);
       var qdiv = document.getElementById("queue")
+      var current_timing_text = null;
       var qdata = JSON.parse(event.data)
+      if (current_song.ref) {
+        cur_timing_text = document.getElementById("timing-info").textContent
+      }
       clearParent(qdiv)
-      qdata.forEach((res) => {
+      qdata.forEach((res, i) => {
         let elm = document.createElement("div")
         elm.innerText = `${res.artists[0].name} - ${res.title}\n Requested by: ${res.requestor}`
+        if (i === 0 && current_song.ref){
+          let new_timing = createTimingInfo()
+          new_timing.innerText = cur_timing_text
+          elm.appendChild(new_timing)
+        }
         qdiv.appendChild(elm)
       })
       if (qdata.length > 0) {
         console.log("queuedata", qdata[0])
         current_song.cur = qdata[0]
         current_song.ref = $("#queue")[0].firstChild
-        var timing_p = document.createElement("p")
-        timing_p.setAttribute("id", "timing-info")
-        current_song.ref.appendChild(timing_p)
+        if ($("#timing-info").length === 0) {
+          var timing_p = document.createElement("p")
+          timing_p.setAttribute("id", "timing-info")
+          current_song.ref.appendChild(timing_p)
+        }
+      } else {
+        current_song.cur = null
+        current_song.ref = null 
       }
     })
+
+    function createTimingInfo() {
+      var timing_p = document.createElement("p")
+      timing_p.setAttribute("id", "timing-info")
+      return timing_p
+    }
   
 
     setInterval((socket) => {
