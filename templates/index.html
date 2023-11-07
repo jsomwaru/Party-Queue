@@ -40,6 +40,12 @@
     </div>
   </div>
   <script>
+    function displayTime(pos) {
+      let minutes = Math.floor(pos / 60)
+      let sec = pos % 60
+      return `${minutes}:${sec}`
+    }
+
     var song = {}
     var current_song = new Proxy(song, {
       set: (target, key, value) => {
@@ -54,7 +60,7 @@
       if (song.cur) {
         song.cur.pos += 1
         if(song.ref) {
-          $("#timing-info").text(`${Math.floor(song.cur.pos)}/${song.cur.duration_seconds}`)
+          $("#timing-info").text(`${displayTime(Math.floor(song.cur.pos))}/${song.cur.duration}`)
         }
       }
     }, 1000)
