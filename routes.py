@@ -5,19 +5,12 @@ from aiohttp import WSCloseCode
 from aiohttp_session import get_session
 
 import logger as log
+import middleware
 import Q
 import youtube
 
 
 logger = log.get_logger(__name__)
-
-def spam_detector(request: dict, q: Q.QM):
-    duplicates = q.get_by_videoid(request["videoId"])
-    queue = q.get_queue()
-    logger.info("Found %d duplicates", len(duplicates))
-    if len(queue) == 0 or (len(duplicates) / (len(queue) + 1) < 0.05 and queue[-1].get("videoId") != request["videoId"]):
-        return True 
-    return False
 
 
 @aiohttp_jinja2.template('index.html')
@@ -58,7 +51,7 @@ async def add(request):
 				metadata = entry
 		if video_id and metadata and video_id != "undefined":
 			metadata["requestor"] = session.get("username", "anonymous")
-			if spam_detector(metadata, request.app["Q"]):
+			if middleware.spam_detector(metadata, request.app["Q"]):
 				request.app["Q"].enqueue(metadata)
 				logger.info("Added song %s to queue", metadata["title"])
 				logger.debug(str(metadata))
@@ -112,13 +105,6 @@ async def toggle_playing(request):
 		return web.HTTPAccepted(text="Pause")
 
 
-async def on_shutdown(app):
-	for ws in app['websockets'].values():
-		try:
-			await ws.close(code=WSCloseCode.GOING_AWAY, message='Server shutdown')
-		except Exception:
-			pass
-
 async def remove(request: web.Request):
     try:
         qpos = request.match_info["qpos"]
@@ -127,13 +113,3 @@ async def remove(request: web.Request):
     except Exception as e:
         logger.error(e)
         return web.HTTPError(text="Failure to remove")
-
-@web.middleware
-async def unset_cookies(request, handler):
-    resp: web.HTTPAccepted = await handler(request)
-    session = await get_session(request)
-    username = session.get("username")
-    if not username:
-        resp.del_cookie("username")
-    return resp
-	
