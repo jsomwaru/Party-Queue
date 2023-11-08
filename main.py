@@ -8,8 +8,9 @@ from aiohttp_session import setup
 from aiohttp_session.redis_storage import RedisStorage
 from redis.asyncio import from_url
 
-import routes
+import middleware
 import Q
+import routes
 
 
 async def main():
@@ -19,7 +20,7 @@ async def main():
 	redis = await from_url("redis://127.0.0.1:6379")
 	storage = RedisStorage(redis)
 	setup(app, storage)
-	app.middlewares.append(routes.unset_cookies)
+	app.middlewares.append(middleware.unset_cookies)
 	app.add_routes([
 		web.get('/', routes.getreq), 
 		web.post('/', routes.songreq),
@@ -28,9 +29,10 @@ async def main():
 		web.post('/setuser', routes.add_username),
 		web.get('/toggle', routes.toggle_playing),
 		web.delete("/remove/{qpos:\d+}", routes.remove), 
-		web.static('/static', "static")
+		web.static('/static', "static"),
+		web.get("/admin", routes.getreq)
 	])
-	app.on_shutdown.append(routes.on_shutdown)
+	app.on_shutdown.append(middleware.on_shutdown)
 	app["websockets"] = {}
 	app["Q"] = q
 
