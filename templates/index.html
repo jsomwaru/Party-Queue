@@ -49,7 +49,6 @@
     var song = {}
     var current_song = new Proxy(song, {
       set: (target, key, value) => {
-        // console.log("set")
         target.ref = $("#queue")[0].firstChild
         target[key] = value
         return true
@@ -208,7 +207,7 @@
 
     var registerForm = document.getElementById("register-form")
 
-    function func(e) {
+    function setuser(e) {
       e.preventDefault();
       let formData = new FormData(e.target)
       var req = Object.fromEntries(formData)
@@ -228,7 +227,7 @@
       }
     }
 
-    registerForm.addEventListener("submit", func)
+    registerForm.addEventListener("submit", setuser)
 
 
   </script>

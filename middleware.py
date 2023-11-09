@@ -13,7 +13,7 @@ async def on_shutdown(app):
 			await ws.close(code=WSCloseCode.GOING_AWAY, message='Server shutdown')
 		except Exception:
 			pass
-		
+
 def spam_detector(request: dict, q: Q.QM):
     duplicates = q.get_by_videoid(request["videoId"])
     queue = q.get_queue()
@@ -30,4 +30,3 @@ async def unset_cookies(request, handler):
     if not username:
         resp.del_cookie("username")
     return resp
-	
