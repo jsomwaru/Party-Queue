@@ -36,14 +36,13 @@ async def getadmin(request):
 
 async def authenticate(request):
 	try:
-		if request.app["auth_enabled"]:
+		if request.app["admin_enabled"]:
 			session = await get_session(request)
 			data = await request.post()
 			password = data["password"]
 			password = urllib.parse.unquote(password)
 			conn = redis.from_url(request.app["redis"])
 			admin_pass = await conn.get("admin_password")
-			logger.info("password %s admin_password %s", sha256(password.encode()).hexdigest(), admin_pass.decode())
 			if sha256(password.encode()).hexdigest() == admin_pass.decode():
 				session[AUTH] = True
 				return web.HTTPAccepted()
