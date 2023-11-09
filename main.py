@@ -18,26 +18,36 @@ import logger as log
 
 logger = log.get_logger(__name__)
 
-async def init_persistent(persistent, file_path="media/.admin_pass"):
-	if os.environ.get("DISABLE_AUTH"):
+
+async def init_admin(persistent, file_path="media/.admin_pass"):
+	if os.environ.get("DISABLE_ADMIN"):
+		logger.info("Admin Disabled")
 		return False
 	elif not os.path.exists(file_path):
-		proc = await asyncio.create_subprocess_shell(
-			f"openssl rand -base64 12 > {file_path}",
-			stderr=asyncio.subprocess.PIPE
-		)
-		_, stderr = await proc.communicate()
-		if stderr:
-			logger.error("Error while creating admin", stderr.decode())
+		try:
+			proc = await asyncio.create_subprocess_shell(
+				f"openssl rand -base64 12 > {file_path} || rm {file_path}",
+				stderr=asyncio.subprocess.PIPE
+			)
+			_, stderr = await proc.communicate()
+			if stderr:
+				logger.error("Error while creating admin so disabling admin.", stderr.decode())
+				return False
+		except Exception:
+			logger.exception("openssl error disabling admin. Please install openssl or set password at media/.admin_pass")
 			return False
-	with open(file_path) as f:
-		admin_pass = f.read().strip()
-		logger.info("admin password %s", admin_pass)
-		await persistent.set(
-			"admin_password", 
-			hashlib.sha256(admin_pass.encode()).hexdigest()
-		)
-	return True
+		with open(file_path) as f:
+			admin_pass = f.read().strip()
+			if len(admin_pass) > 8:
+				await persistent.set(
+					"admin_password", 
+					hashlib.sha256(admin_pass.encode()).hexdigest()
+				)
+			else:
+				logger.info("Admin password empty. Disabling admin user.")
+				return False
+		logger.info("Admin user enabled")
+		return True
 
 
 async def main():
@@ -46,7 +56,7 @@ async def main():
 	aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader('templates'))
 	app["redis"] = "redis://127.0.0.1:6379"
 	redis = await from_url(app["redis"])
-	app["auth_enabled"]  = await init_persistent(redis)
+	app["admin_enabled"]  = await init_admin(redis)
 	storage = RedisStorage(redis)
 	setup(app, storage)
 	app.middlewares.append(middleware.unset_cookies)
