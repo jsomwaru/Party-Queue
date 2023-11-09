@@ -1,14 +1,20 @@
+import urllib.parse 
+
+from hashlib import sha256
+
 import aiohttp_jinja2
 from aiohttp import web
 from aiohttp.web_ws import WebSocketResponse
-from aiohttp import WSCloseCode
 from aiohttp_session import get_session
+
+import redis.asyncio as redis
 
 import logger as log
 import middleware
 import Q
 import youtube
 
+AUTH = "authenticated"
 
 logger = log.get_logger(__name__)
 
@@ -19,6 +25,35 @@ async def getreq(request):
 	return {}
 
 
+@aiohttp_jinja2.template('admin.html')
+async def getadmin(request):
+    try:
+        await get_session(request) # start or get session
+        return {}
+    finally:
+        return {}
+
+
+async def authenticate(request):
+	try:
+		if request.app["auth_enabled"]:
+			session = await get_session(request)
+			data = await request.post()
+			password = data["password"]
+			password = urllib.parse.unquote(password)
+			conn = redis.from_url(request.app["redis"])
+			admin_pass = await conn.get("admin_password")
+			logger.info("password %s admin_password %s", sha256(password.encode()).hexdigest(), admin_pass.decode())
+			if sha256(password.encode()).hexdigest() == admin_pass.decode():
+				session[AUTH] = True
+				return web.HTTPAccepted()
+			return web.HTTPUnauthorized()
+		return web.HTTPOk()
+	except Exception as e:
+		logger.error(e)
+		return web.HTTPBadRequest()
+
+        
 async def songreq(request):
 	data = await request.post()
 	session = await get_session(request)
@@ -107,9 +142,13 @@ async def toggle_playing(request):
 
 async def remove(request: web.Request):
     try:
-        qpos = request.match_info["qpos"]
-        request.app["Q"].remove(int(qpos))
-        return web.HTTPAccepted()
+        session = await get_session(request)
+        if session.get(AUTH):
+            qpos = request.match_info["qpos"]
+            request.app["Q"].remove(int(qpos))
+            user = session.get("username", session.identity)
+            logger.info("User %s removed song at pos %s", user, qpos)
+            return web.HTTPAccepted(text=f"Song Removed at pos {qpos}")
     except Exception as e:
         logger.error(e)
         return web.HTTPError(text="Failure to remove")
