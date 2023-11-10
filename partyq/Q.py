@@ -7,8 +7,8 @@ from pyaudio import PyAudio
 from pydub.utils import make_chunks
 from pydub import AudioSegment
 
-import logger as log
-import youtube
+from partyq import logger as log
+from partyq import youtube
 
 logger = log.get_logger(__name__)
 
