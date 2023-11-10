@@ -26,7 +26,12 @@ def spam_detector(request: dict, q: Q.QM):
 async def unset_cookies(request, handler):
     resp: web.HTTPAccepted = await handler(request)
     session = await get_session(request)
+    # Unset username
     username = session.get("username")
     if not username:
         resp.del_cookie("username")
+    # Unset authenticated
+    authenticated = session.get("autenticated")
+    if not authenticated:
+          resp.del_cookie("authenticated")
     return resp
