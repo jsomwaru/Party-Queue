@@ -31,7 +31,7 @@ async def unset_cookies(request, handler):
     if not username:
         resp.del_cookie("username")
     # Unset authenticated
-    authenticated = session.get("autenticated")
+    authenticated = session.get("authenticated")
     if not authenticated:
           resp.del_cookie("authenticated")
     return resp

@@ -4,6 +4,9 @@
   <title>Party Q (Beta)</title>
   <meta name="description" content="PartyQ">
   <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+  <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <link rel="stylesheet" href="/static/base.css">
 </head>
   <body>
     <form action="/admin/auth" method="post">
@@ -13,7 +16,24 @@
     </form>
     <div id="qtable">
       <p>&nbsp;</p>
+      <div id="queue">
+      </div>
     </div>
   </body>
+  <script>
+    function makeRemoveable(){
+      $("#queue")
+      .children()
+      .wrap("<a class='removeable'></a>")
+      .on("click", function(e) {
+          e.preventDefault()
+          let pos = e.target.getAttribute("pos")
+          console.log(e.target.getAttribute("pos"))
+          fetch(`${window.origin}/remove/${pos}`, {
+            method: "delete"
+          })
+      })
+    }
+  </script>
   <script src="/static/shared.js"></script>
 </html>

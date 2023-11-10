@@ -13,7 +13,7 @@ class NoStreamFoundException(Exception):
 
 async def search(query):
     ytm = ytmusicapi.YTMusic("browser.json")
-    results = ytm.search(query)
+    results = ytm.search(query, filter="songs")
     return results
 
 

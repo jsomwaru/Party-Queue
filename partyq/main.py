@@ -34,21 +34,20 @@ async def init_admin(persistent, file_path="media/.admin_pass"):
 				logger.error("Error while creating admin so disabling admin.", stderr.decode())
 				return False
 		except Exception:
-			logger.exception("openssl error disabling admin. Please install openssl or set password at media/.admin_pass")
+			logger.exception("openssl error, disabling admin. Please install openssl or set password at media/.admin_pass")
 			return False
-		with open(file_path) as f:
-			admin_pass = f.read().strip()
-			if len(admin_pass) > 8:
-				await persistent.set(
-					"admin_password", 
-					hashlib.sha256(admin_pass.encode()).hexdigest()
-				)
-			else:
-				logger.info("Admin password empty. Disabling admin user.")
-				return False
+	with open(file_path) as f:
+		admin_pass = f.read().strip()
+		if len(admin_pass) >= 8:
+			await persistent.set(
+				"admin_password", 
+				hashlib.sha256(admin_pass.encode()).hexdigest()
+			)
+		else:
+			logger.info("Admin password empty. Disabling admin user.")
+			return False
 		logger.info("Admin user enabled")
 		return True
-
 
 async def main():
 	q = Q.QM()
