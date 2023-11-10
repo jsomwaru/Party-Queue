@@ -45,7 +45,9 @@ async def authenticate(request):
 			admin_pass = await conn.get("admin_password")
 			if sha256(password.encode()).hexdigest() == admin_pass.decode():
 				session[AUTH] = True
-				return web.HTTPAccepted()
+				res = web.HTTPAccepted()
+				res.set_cookie("authenticated", "1")
+				return res
 			return web.HTTPUnauthorized()
 		return web.HTTPOk()
 	except Exception as e:
