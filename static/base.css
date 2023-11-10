@@ -1,0 +1,13 @@
+body {
+  font-family: monospace;
+  font-size: large;
+}
+
+a:hover {
+  color: hotpink;
+}
+
+/* selected link */
+a:active {
+  color: blue;
+}

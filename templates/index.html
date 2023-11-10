@@ -156,7 +156,7 @@
     socket.addEventListener("message", (event) => {
       console.log("Message from server ", event.data);
       var qdiv = document.getElementById("queue")
-      var current_timing_text = null;
+      var cur_timing_text = null;
       var qdata = JSON.parse(event.data)
       if (current_song.ref) {
         cur_timing_text = document.getElementById("timing-info").textContent
@@ -164,6 +164,7 @@
       clearParent(qdiv)
       qdata.forEach((res, i) => {
         let elm = document.createElement("div")
+        elm.setAttribute("pos", i)
         elm.innerText = `${res.artists[0].name} - ${res.title}\n Requested by: ${res.requestor}`
         if (i === 0 && current_song.ref){
           let new_timing = createTimingInfo()
