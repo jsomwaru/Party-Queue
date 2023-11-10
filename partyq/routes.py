@@ -9,10 +9,10 @@ from aiohttp_session import get_session
 
 import redis.asyncio as redis
 
-import logger as log
-import middleware
-import Q
-import youtube
+from partyq import logger as log
+from partyq import middleware
+from partyq import Q
+from partyq import youtube
 
 AUTH = "authenticated"
 

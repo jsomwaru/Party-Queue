@@ -2,8 +2,8 @@ from aiohttp import WSCloseCode
 from aiohttp import web
 from aiohttp_session import get_session
 
-import Q
-import logger as log
+from partyq import Q
+from partyq import logger as log
 
 logger = log.get_logger(__name__)
 

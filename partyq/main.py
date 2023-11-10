@@ -10,10 +10,10 @@ from aiohttp_session import setup
 from aiohttp_session.redis_storage import RedisStorage
 from redis.asyncio import from_url
 
-import middleware
-import Q
-import routes
-import logger as log
+from partyq import middleware
+from partyq import Q
+from partyq import routes
+from partyq import logger as log
 
 
 logger = log.get_logger(__name__)

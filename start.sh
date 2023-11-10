@@ -10,4 +10,4 @@ else
     docker restart $id
 fi
 popd
-adev runserver main.py --host 0.0.0.0 --port 80 --app-factory main   
+adev runserver partyq/main.py --host 0.0.0.0 --port 80 --app-factory main   
