@@ -28,7 +28,6 @@
       .on("click", function(e) {
           e.preventDefault()
           let pos = e.target.getAttribute("pos")
-          console.log(e.target.getAttribute("pos"))
           fetch(`${window.origin}/remove/${pos}`, {
             method: "delete"
           })
