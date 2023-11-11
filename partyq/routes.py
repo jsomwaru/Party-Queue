@@ -129,6 +129,7 @@ async def add_username(request):
         logger.error("ERROR while submmiting log %s", e)
         raise web.HTTPInternalServerError(text="An error occured") from e
 
+
 async def toggle_playing(request):
 	session = await get_session(request)
 	if Q.CONTROL.is_set(): # Pause
