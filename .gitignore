@@ -4,3 +4,5 @@ browser.json
 *.mp4
 *.wav
 .vscode/
+node_modules/
+dist/
