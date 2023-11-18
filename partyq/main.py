@@ -85,7 +85,9 @@ async def main():
         web.post("/admin/auth", routes.authenticate),
         web.post("/admin/update-authentication", routes.update_authentication),
         web.get("/devices", routes.list_devices),
-        web.put("/admin/set-device/{did}", routes.set_device)
+        web.put("/admin/set-device/{did}", routes.set_device),
+        web.static('/dist', "ui/dist"),
+        web.get("/ui", routes.getui)
     ])
 
     app["websockets"] = {}

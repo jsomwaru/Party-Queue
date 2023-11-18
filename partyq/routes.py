@@ -24,6 +24,10 @@ async def getreq(request: web.Request):
     await get_session(request) # start or get session
     return {}
 
+async def getui(request):
+	await get_session(request) # start or get session
+	return web.FileResponse("ui/dist/index.html")
+
 
 @aiohttp_jinja2.template('admin.html')
 async def getadmin(request: web.Request):
