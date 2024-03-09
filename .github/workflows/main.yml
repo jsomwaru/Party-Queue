@@ -5,7 +5,9 @@ jobs:
   deploy:
     runs-on: "self-hosted"
     steps:
-      - name: Test
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Check active
         run: |
           pwd
           ls
