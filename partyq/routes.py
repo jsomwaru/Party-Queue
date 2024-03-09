@@ -1,3 +1,4 @@
+import json
 import urllib.parse 
 
 from hashlib import sha256
@@ -154,3 +155,15 @@ async def remove(request: web.Request):
     except Exception as e:
         logger.error(e)
         return web.HTTPError(text="Failure to remove")
+
+
+async def update_authentication(request: web.Request):
+    session = await get_session(request)
+    if session.get(AUTH):
+        data = await request.json()
+        with open("browser.json", "w+") as f:
+            f.write(json.dumps(data))
+        return web.HTTPAccepted(text="Credentials Updated")
+    else:
+        return web.HTTPUnauthorized()
+	
