@@ -12,3 +12,11 @@ services:
         reservations:
           cpus: '0.5'
           memory: 20M
+  nginx:
+    image: nginx
+    ports:
+      - 80:80
+    network: host
+    volumes: 
+      - files/nginx.conf:/etc/nginx/nginx.conf
+      
