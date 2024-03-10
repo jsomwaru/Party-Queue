@@ -5,5 +5,5 @@ Description="PartyQ"
 Type=Fork
 WorkingDirectory=/opt/actions-runnner/_work/Party-Queue/Party-Queue/
 PIDFile=/opt/actions-runnner/_work/Party-Queue/Party-Queue/pid
-ExecStartPre=source /opt/actions-runnner/partyq/bin/activate
+ExecStartPre="source /opt/actions-runnner/partyq/bin/activate"
 ExecStart=/opt/actions-runnner/_work/Party-Queue/Party-Queue/start.sh
