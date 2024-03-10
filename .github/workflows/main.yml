@@ -19,7 +19,4 @@ jobs:
           sudo su
           source ~/partyq/bin/activate
           pip install --require-virtualenv -r requirements.txt
-          
-          export VIRTUAL_ENV=/opt/actions-runner/partyq 
-          ./start.sh &
-          echo $! > pid
+          ansible-playbook install/ansible/playbook -i localhost -l localhost

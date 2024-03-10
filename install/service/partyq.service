@@ -1,0 +1,8 @@
+[Unit]
+Description="PartyQ"
+
+[Service]
+Type=Simple
+PIDFile=/opt/actions-runnner/_work/Party-Queue/Party-Queue/pid
+ExecStartPre=source /opt/actions-runnner/partyq/bin/activate
+ExecStart=/opt/actions-runnner/_work/Party-Queue/Party-Queue/start.sh

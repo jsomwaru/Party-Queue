@@ -1,0 +1,22 @@
+---
+hosts: all
+  tasks:
+    - name: Copy Systemd Service
+      ansible.builtin.copy:
+        src: install/service/partyq.service
+        dest: /etc/systemd/system/partyq.service
+        mode: '644'
+        owner: root
+        group: root
+      become: yes
+
+    - name: Stop PartyQ if currently running
+      ansible.builtin.systemd_service:
+        name: partyq
+        state: stopped
+
+    - name: Start PartyQ
+      ansible.builtin.systemd_service:
+        daemon_reload: true
+        state: started 
+        name: partyq
