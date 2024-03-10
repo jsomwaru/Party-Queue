@@ -2,7 +2,6 @@
 Description="PartyQ"
 
 [Service]
-Type=Fork
 WorkingDirectory=/opt/actions-runnner/_work/Party-Queue/Party-Queue/
 PIDFile=/opt/actions-runnner/_work/Party-Queue/Party-Queue/pid
 ExecStart=/opt/actions-runnner/_work/Party-Queue/Party-Queue/start.sh
