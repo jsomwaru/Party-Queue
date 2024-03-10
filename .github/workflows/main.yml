@@ -2,7 +2,7 @@ name: "Deploy PartyQ"
 on:
   workflow_dispatch:
 jobs:
-  deploy:
+  Deploy:
     runs-on: "self-hosted"
     steps:
       - name: Checkout
@@ -19,4 +19,4 @@ jobs:
           sudo su
           source ~/partyq/bin/activate
           pip install --require-virtualenv -r requirements.txt
-          ansible-playbook install/ansible/playbook.yml  --inventory 127.0.0.1, -l 127.0.0.1
+          ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook install/ansible/playbook.yml  --inventory 127.0.0.1, -l 127.0.0.1

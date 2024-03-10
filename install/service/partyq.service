@@ -2,7 +2,7 @@
 Description="PartyQ"
 
 [Service]
-Type=Simple
+Type=Fork
 WorkingDirectory=/opt/actions-runnner/_work/Party-Queue/Party-Queue/
 PIDFile=/opt/actions-runnner/_work/Party-Queue/Party-Queue/pid
 ExecStartPre=source /opt/actions-runnner/partyq/bin/activate
