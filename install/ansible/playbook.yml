@@ -16,6 +16,7 @@
         name: partyq
         state: stopped
       become: yes
+      ignore_errors: yes
 
     - name: Start PartyQ
       ansible.builtin.systemd_service:
