@@ -9,6 +9,18 @@ jobs:
         uses: actions/checkout@v4
       - name: Check active
         run: |
-          pwd
-          ls
-          whoami
+          VENV=~/partyq
+          if [ ! -d  $VENV ]
+          then
+            python -m venv ~/partyq/
+          fi
+          source ~/partyq/bin/activate
+          pip install -r requirements.txt
+          
+          session=$(tmux ls | grep partyq)
+          if [ -n session ]
+          then
+            tmux kill-session -t partyq
+          fi
+
+          tmux new-session -d -s partyq 'source ~/partyq/bin/activate && ./start.sh'
