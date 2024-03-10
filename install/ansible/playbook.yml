@@ -12,6 +12,7 @@
 
     - name: Stop PartyQ if currently running
       ansible.builtin.systemd_service:
+        daemon_reload: true
         name: partyq
         state: stopped
       become: yes
