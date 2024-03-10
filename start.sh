@@ -10,4 +10,11 @@ else
     docker restart $id
 fi
 popd
-adev runserver partyq/main.py --host 0.0.0.0 --port 80 --app-factory main   
+
+if [ $OSTYPE = "darwin"] 
+then
+    adev runserver partyq/main.py --host 0.0.0.0 --port 80 --app-factory main   
+elif [ $OSTYPE = "linux-gnu" ]
+then
+    sudo -E adev runserver partyq/main.py --host 0.0.0.0 --port 80 --app-factory main   
+fi 
