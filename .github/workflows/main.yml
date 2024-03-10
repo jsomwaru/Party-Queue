@@ -16,6 +16,7 @@ jobs:
           then
             python -m venv ~/partyq/
           fi
+          sudo su
           source ~/partyq/bin/activate
           pip install --require-virtualenv -r requirements.txt
           
