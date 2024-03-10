@@ -18,4 +18,5 @@ jobs:
           source ~/partyq/bin/activate
           pip install -r requirements.txt
           
-          source ~/partyq/bin/activate && ./start.sh & && echo $! > pid
+          source ~/partyq/bin/activate && ./start.sh &
+          echo $! > pid
