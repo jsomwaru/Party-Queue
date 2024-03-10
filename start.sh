@@ -17,5 +17,5 @@ then
 elif [ $OSTYPE = "linux-gnu" ]
 then
     source ~/partyq/bin/activate
-    adev runserver partyq/main.py --host 0.0.0.0 --port 8080 --app-factory main   
+    adev runserver partyq/main.py --host 0.0.0.0 --port 8080 --app-factory main  &
 fi 
