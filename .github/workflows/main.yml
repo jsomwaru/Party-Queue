@@ -23,4 +23,4 @@ jobs:
             tmux kill-session -t partyq
           fi
 
-          tmux new-session -d -s partyq 'source ~/partyq/bin/activate && ./start.sh'
+          # tmux new-session -d -s partyq 'source ~/partyq/bin/activate && ./start.sh'
