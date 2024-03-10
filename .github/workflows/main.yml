@@ -19,4 +19,4 @@ jobs:
           sudo su
           source ~/partyq/bin/activate
           pip install --require-virtualenv -r requirements.txt
-          ansible-playbook install/ansible/playbook.yml -i localhost -l localhost
+          ansible-playbook install/ansible/playbook.yml  --inventory 127.0.0.1, -l 127.0.0.1
