@@ -10,6 +10,7 @@ jobs:
       - name: Check active
         run: |
           VENV=~/partyq
+          pwd
           if [ ! -d  $VENV ]
           then
             python -m venv ~/partyq/
@@ -17,10 +18,4 @@ jobs:
           source ~/partyq/bin/activate
           pip install -r requirements.txt
           
-          session=$(tmux ls | grep partyq)
-          # if [ -n session ]
-          # then
-          #   tmux kill-session -t partyq
-          # fi
-
-          # tmux new-session -d -s partyq 'source ~/partyq/bin/activate && ./start.sh'
+          'source ~/partyq/bin/activate && ./start.sh & && $! > pid'
