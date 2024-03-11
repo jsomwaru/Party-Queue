@@ -10,7 +10,6 @@ jobs:
         
       - name: Start PartyQ
         run: |
-          VENV=~/partyq
           pwd
           if [ ! -d  $VENV ]
           then
@@ -19,4 +18,4 @@ jobs:
           sudo su
           source ~/partyq/bin/activate
           pip install --require-virtualenv -r requirements.txt
-          ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook install/ansible/playbook.yml  --inventory 127.0.0.1, -l 127.0.0.1 --connection local
+          ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook install/ansible/playbook.yml --inventory 127.0.0.1, -l 127.0.0.1 --connection local -e "virtualenv=$VIRTUAL_ENV"

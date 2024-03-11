@@ -2,7 +2,7 @@
 - hosts: all
   tasks:
     - name: Copy Systemd Service
-      ansible.builtin.copy:
+      ansible.builtin.template:
         src: ../service/partyq.service
         dest: /etc/systemd/system/partyq.service
         mode: '644'
