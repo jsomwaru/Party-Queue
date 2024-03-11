@@ -16,6 +16,6 @@ then
     adev runserver partyq/main.py --host 0.0.0.0 --port 80 --app-factory main
 elif [ $OSTYPE = "linux-gnu" ]
 then
-    source $VIRTUAL_ENV
+    source $VIRTUAL_ENV/bin/activate
     adev runserver partyq/main.py --host 0.0.0.0 --port 8080 --app-factory main
 fi 
