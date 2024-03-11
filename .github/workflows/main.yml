@@ -8,14 +8,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         
-      - name: Start PartyQ
+      - name: Install PartyQ
         run: |
           pwd
+          VENV=media/partyq
           if [ ! -d  $VENV ]
           then
-            python -m venv ~/partyq/
+            python -m venv $VENV
           fi
-          sudo su
-          source ~/partyq/bin/activate
+          source $VENV/bin/activate 
           pip install --require-virtualenv -r requirements.txt
-          ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook install/ansible/playbook.yml --inventory 127.0.0.1, -l 127.0.0.1 --connection local -e "virtualenv=$VIRTUAL_ENV"
+          ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook \
+            install/ansible/playbook.yml \
+            --inventory 127.0.0.1, -l 127.0.0.1 \
+            --connection local \
+            -e "virtualenv=$VIRTUAL_ENV"
