@@ -1,0 +1,25 @@
+name: "Deploy PartyQ"
+on:
+  workflow_dispatch:
+jobs:
+  Deploy:
+    runs-on: "self-hosted"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Install PartyQ
+        run: |
+          pwd
+          VENV=media/partyq
+          if [ ! -d  $VENV ]
+          then
+            python -m venv $VENV
+          fi
+          source $VENV/bin/activate 
+          pip install --require-virtualenv -r requirements.txt
+          ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook \
+            install/ansible/playbook.yml \
+            --inventory 127.0.0.1, -l 127.0.0.1 \
+            --connection local \
+            -e "virtualenv=$VIRTUAL_ENV"

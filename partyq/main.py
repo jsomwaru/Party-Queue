@@ -69,7 +69,8 @@ async def main():
 		web.delete("/remove/{qpos:\d+}", routes.remove), 
 		web.static('/static', "static"),
 		web.get("/admin", routes.getadmin),
-		web.post("/admin/auth", routes.authenticate)
+		web.post("/admin/auth", routes.authenticate),
+		web.post("/admin/update-authentication", routes.update_authentication)
 	])
 	app.on_shutdown.append(middleware.on_shutdown)
 	app["websockets"] = {}
