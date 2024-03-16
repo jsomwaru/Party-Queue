@@ -4,6 +4,10 @@ from enum import Enum, auto
 import pyaudio
 from bleak import BleakClient, BleakScanner
 
+import logger as log
+
+logger = log.get_logger(__name__)
+
 
 class DeviceType(Enum):
     REMOTE = auto()
@@ -22,6 +26,8 @@ class DeviceManager:
 
     def __init__(self):
         self.devices = set()
+        self._local_devices()
+        self._remote_devices()
         self._audio = pyaudio.PyAudio()
 
     def _local_devices(self):
@@ -47,6 +53,10 @@ class DeviceManager:
 
     async def disconnect(self):
         if self.current_device and self.current_device.dtype == DeviceType.REMOTE:
-            self.remote_context.disconnect()
+            try:
+                self.remote_context.disconnect()
+            except Exception:
+                logger.exception("Encountered error while disconnecting")
+                return False
         return True
         
