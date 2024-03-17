@@ -167,8 +167,9 @@ async def update_authentication(request: web.Request):
 
 async def list_devices(request: web.Request):
     try:
+        session = await get_session(request)
         device_manager = device.DeviceManager()
         data = device_manager.device_dict()
-        return web.json_response(data=data)
+        return web.HTTPOk(body=json.dumps(data))
     except:
         return web.HTTPInternalServerError(body="Error listing devices")
