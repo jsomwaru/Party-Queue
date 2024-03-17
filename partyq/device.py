@@ -16,6 +16,9 @@ class DeviceType(Enum):
 class DeviceManager:
     """Manage Playback device
     """
+
+    current_device = None
+    remote_context = None
     
     @dataclass
     class Device:
@@ -59,4 +62,8 @@ class DeviceManager:
                 logger.exception("Encountered error while disconnecting")
                 return False
         return True
-        
+    
+    def device_dict(self):
+        return {
+            "devices": [d.asdict() for d in self.devices]
+        }

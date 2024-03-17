@@ -19,8 +19,30 @@
       <div id="queue">
       </div>
     </div>
+    <button type="submit" id="device">List Devices</button>
+    <div id="devicelist"></div>
   </body>
   <script>
+
+    $("#device").on("click", listDevices)
+
+    async function listDevices(e) {
+      e.preventDefault()
+      fetch(`${window.origin}/devices`, {
+        method: "get"
+      }).then(res => {
+        if (res.ok) {
+          res.json()
+        }
+      }).then(res => {
+        res.devices.forEach((item) => {
+          $("devicelist").append(`<a class="device"><div>${item.dtype}, ${item.name}, ${item.did} <div></a>`)
+        })
+      }).catch(e => console.log( 
+        "Failed getting devices", e
+      ))
+    }
+
     function makeRemoveable(){
       $("#queue")
       .children()

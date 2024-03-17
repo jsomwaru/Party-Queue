@@ -10,6 +10,7 @@ from aiohttp_session import get_session
 
 import redis.asyncio as redis
 
+from partyq import device
 from partyq import logger as log
 from partyq import middleware
 from partyq import Q
@@ -163,4 +164,11 @@ async def update_authentication(request: web.Request):
         f.write(json.dumps(data))
     return web.HTTPAccepted(text="Credentials Updated")
 
-	
+
+async def list_devices(request: web.Request):
+    try:
+        device_manager = device.DeviceManager()
+        data = device_manager.device_dict()
+        return web.json_response(data=data)
+    except:
+        return web.HTTPInternalServerError(body="Error listing devices")
