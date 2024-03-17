@@ -21,13 +21,13 @@ logger = log.get_logger(__name__)
 
 
 @aiohttp_jinja2.template('index.html')
-async def getreq(request):
+async def getreq(request: web.Request):
 	await get_session(request) # start or get session
 	return {}
 
 
 @aiohttp_jinja2.template('admin.html')
-async def getadmin(request):
+async def getadmin(request: web.Request):
     try:
         await get_session(request) # start or get session
         return {}
@@ -35,7 +35,7 @@ async def getadmin(request):
         return {}
 
 
-async def authenticate(request):
+async def authenticate(request: web.Request):
 	try:
 		if request.app["admin_enabled"]:
 			session = await get_session(request)
@@ -56,7 +56,7 @@ async def authenticate(request):
 		return web.HTTPBadRequest()
 
         
-async def songreq(request):
+async def songreq(request: web.Request):
 	data = await request.post()
 	session = await get_session(request)
 	try:
@@ -70,7 +70,7 @@ async def songreq(request):
 		raise web.HTTPBadRequest(text = 'Enter a song') from e
 
 
-async def add(request):
+async def add(request: web.Request):
 	data = await request.json()
 	session = await get_session(request)
 	try:
@@ -100,7 +100,7 @@ async def add(request):
 		raise web.HTTPBadRequest(text = 'Error adding selection to queue') from e
 
 
-async def QWatcher(request):
+async def QWatcher(request: web.Request):
 	session = await get_session(request)
 	resp = WebSocketResponse()
 	request.app["websockets"][session.identity] = resp
@@ -116,7 +116,7 @@ async def QWatcher(request):
 		await request.app["websockets"][session.identity].close()
 
 
-async def add_username(request):
+async def add_username(request: web.Request):
     session = await get_session(request)
     try:
         data = await request.post()
@@ -131,7 +131,7 @@ async def add_username(request):
         raise web.HTTPInternalServerError(text="An error occured") from e
 
 
-async def toggle_playing(request):
+async def toggle_playing(request: web.Request):
 	session = await get_session(request)
 	if Q.CONTROL.is_set(): # Pause
 		Q.CONTROL.clear()

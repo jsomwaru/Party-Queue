@@ -81,6 +81,3 @@ async def main():
 	task = asyncio.create_task(partyq)
 	app["partyq"] = task
 	return app
-
-if __name__ == "__main__":
-	asyncio.run(main())
