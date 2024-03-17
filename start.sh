@@ -11,7 +11,7 @@ else
 fi
 popd
 
-if [ $OSTYPE = "darwin" ] 
+if [[ $OSTYPE =~ [darwin\d*] ]]
 then
     adev runserver partyq/main.py --host 0.0.0.0 --port 80 --app-factory main
 elif [ $OSTYPE = "linux-gnu" ]
