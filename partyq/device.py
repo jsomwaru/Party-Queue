@@ -4,7 +4,7 @@ from enum import Enum, auto
 import pyaudio
 from bleak import BleakClient, BleakScanner
 
-import logger as log
+from partyq import logger as log
 
 logger = log.get_logger(__name__)
 
