@@ -1,4 +1,6 @@
-from dataclasses import dataclass
+import asyncio
+
+from dataclasses import dataclass, asdict
 from enum import Enum, auto
 
 import pyaudio
@@ -9,7 +11,7 @@ from partyq import logger as log
 logger = log.get_logger(__name__)
 
 
-class DeviceType(Enum):
+class DeviceType(str, Enum):
     REMOTE = auto()
     LOCAL = auto()
 
@@ -26,14 +28,13 @@ class DeviceManager:
         did: str 
         name: str
         def __eq__(self, other): return self.did == other.did and self.dtype == other.dtype
+        def __hash__(self): return hash((self.dtype, self.did, self.name))
 
     def __init__(self):
         self.devices = set()
-        self._local_devices()
-        self._remote_devices()
         self._audio = pyaudio.PyAudio()
 
-    def _local_devices(self):
+    async def _local_devices(self):
         info = self._audio.get_host_api_info_by_index(0)
         device_count = info.get("deviceCount")
         for i in range(device_count):
@@ -63,7 +64,12 @@ class DeviceManager:
                 return False
         return True
     
+    async def list_devices(self):
+        await asyncio.gather(self._remote_devices(),  self._local_devices())
+        return self.device_dict()
+    
+
     def device_dict(self):
         return {
-            "devices": [d.asdict() for d in self.devices]
+            "devices": [asdict(d) for d in self.devices]
         }

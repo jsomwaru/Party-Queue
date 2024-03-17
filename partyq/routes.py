@@ -168,8 +168,11 @@ async def update_authentication(request: web.Request):
 async def list_devices(request: web.Request):
     try:
         session = await get_session(request)
-        device_manager = device.DeviceManager()
-        data = device_manager.device_dict()
-        return web.HTTPOk(body=json.dumps(data))
-    except:
-        return web.HTTPInternalServerError(body="Error listing devices")
+        logger.info("Entering partyq")
+        device_manager: device.DeviceManager = device.DeviceManager()
+        data = await device_manager.list_devices()
+        return web.json_response(data=data, content_type="application/json")
+    except Exception as e:
+        logger.exception("error")
+        return web.HTTPInternalServerError(text="Error listing devices")
+

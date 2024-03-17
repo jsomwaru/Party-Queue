@@ -30,11 +30,9 @@
       e.preventDefault()
       fetch(`${window.origin}/devices`, {
         method: "get"
-      }).then(res => {
-        if (res.ok) {
-          res.json()
-        }
-      }).then(res => {
+      }).then(res =>  res.json())
+      .then(res => {
+        console.log(res)
         res.devices.forEach((item) => {
           $("devicelist").append(`<a class="device"><div>${item.dtype}, ${item.name}, ${item.did} <div></a>`)
         })
