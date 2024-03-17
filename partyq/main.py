@@ -71,6 +71,7 @@ async def main():
 		web.get("/admin", routes.getadmin),
 		web.post("/admin/auth", routes.authenticate),
 		web.post("/admin/update-authentication", routes.update_authentication),
+		web.get("/devices", routes.list_devices)
 	])
 
 	app.on_shutdown.append(middleware.on_shutdown)
