@@ -7,18 +7,16 @@ import ytmusicapi
 """
 THIS IS BULLSHIT
 """
-
-BROWSER_FILE = "browser.json"
-OAUTH_FILE = "oauth.json"
+DATA_DIR="media"
+BROWSER_FILE = os.path.join(DATA_DIR, "browser.json")
 
 class NoStreamFoundException(Exception):
     pass
 
 async def search(query):
-    ytm = ytmusicapi.YTMusic("browser.json")
+    ytm = ytmusicapi.YTMusic(BROWSER_FILE)
     results = ytm.search(query, filter="songs")
     return results
-
 
 class YTClient:
     """
@@ -29,8 +27,7 @@ class YTClient:
 
     def __init__(self, video_id):
         url = self.base_url.format(video_id)
-        self.yt = YouTube(url, use_oauth=True, allow_oauth_cache=True)
-        self.ytmusic = self.authenticated_youtubemusicapi() if self.is_authenticated() else ytmusicapi.YTMusic()
+        self.yt = YouTube(url, use_oauth=False, allow_oauth_cache=True)
         self._stream = None
 
     def get_best_audio_stream(self, best_effort=True):
@@ -73,22 +70,7 @@ class YTClient:
             "abr": self.cur_stream.abr, 
             "filesize": self.cur_stream.filesize
         }
-    
-    def authenticated_youtubemusicapi(self):
-        if os.path.exists(BROWSER_FILE):
-            return ytmusicapi.YTMusic(BROWSER_FILE)
-        elif os.path.exists(OAUTH_FILE):
-            return ytmusicapi.YTMusic(OAUTH_FILE)
-        
-    def is_authenticated(self):
-        return os.path.exists(BROWSER_FILE) or os.path.exists(OAUTH_FILE)
-    
-    async def search(self, query: str):
-        self.ytmusic.search(query, filter="songs")
 
-    def setup_ytmusic_oauth():
-        ytmusicapi.setup_oauth(filepath=OAUTH_FILE)
-    
 
 class StreamWrapper: 
     """
