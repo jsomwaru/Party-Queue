@@ -70,8 +70,9 @@ async def main():
 		web.static('/static', "static"),
 		web.get("/admin", routes.getadmin),
 		web.post("/admin/auth", routes.authenticate),
-		web.post("/admin/update-authentication", routes.update_authentication)
+		web.post("/admin/update-authentication", routes.update_authentication),
 	])
+
 	app.on_shutdown.append(middleware.on_shutdown)
 	app["websockets"] = {}
 	app["Q"] = q

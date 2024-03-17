@@ -158,12 +158,9 @@ async def remove(request: web.Request):
 
 
 async def update_authentication(request: web.Request):
-    session = await get_session(request)
-    if session.get(AUTH):
-        data = await request.json()
-        with open("browser.json", "w+") as f:
-            f.write(json.dumps(data))
-        return web.HTTPAccepted(text="Credentials Updated")
-    else:
-        return web.HTTPUnauthorized()
+    data = await request.json()
+    with open(youtube.BROWSER_FILE, "w+") as f:
+        f.write(json.dumps(data))
+    return web.HTTPAccepted(text="Credentials Updated")
+
 	
