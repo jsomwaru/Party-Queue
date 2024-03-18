@@ -57,7 +57,7 @@ class QM:
             del self._q[qpos]
     
 
-def download(vid):
+def download(vid: str):
     buffer = BytesIO()
     yt = youtube.YTClient(vid)
     yt.download_stream(buffer)
