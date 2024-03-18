@@ -60,9 +60,7 @@ class QM:
 def download(vid):
     buffer = BytesIO()
     yt = youtube.YTClient(vid)
-    yt.get_best_audio_stream()
-    yt.cur_stream.stream_to_buffer(buffer)
-    buffer.seek(0)
+    yt.download_stream(buffer)
     return buffer
 
 

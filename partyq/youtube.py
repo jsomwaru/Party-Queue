@@ -1,8 +1,9 @@
 import os
-from pytube import YouTube
-import requests
+from io import BytesIO
 
 import ytmusicapi
+
+from pytube import YouTube
 
 """
 THIS IS BULLSHIT
@@ -37,7 +38,7 @@ class YTClient:
         if not self.is_audio_available and not best_effort:
             raise NoStreamFoundException("Audio stream not found")
         #self._stream = StreamWrapper(self.yt.streams.filter(only_audio=True, mime_type="audio/webm").order_by("abr")[-1])
-        self._stream = StreamWrapper(self.yt.streams.get_audio_only())
+        self._stream = self.yt.streams.get_audio_only()
 
     @property
     def streams(self):
@@ -50,16 +51,15 @@ class YTClient:
     def streams_to_json(self):
         return self.yt.metadata
 
-    def download_stream(self):
-        if self._stream is None:
-            self.get_best_audio_stream()
-        return self._stream.download()
+    def download_stream(self, buffer: BytesIO):
+        self.cur_stream.stream_to_buffer(buffer)
+        buffer.seek(0)   
 
     @property
     def cur_stream(self):
         if self._stream is None:
             self.get_best_audio_stream()
-        return self._stream._stream
+        return self._stream
 
     def metadata(self):
         print(self.cur_stream)
@@ -71,26 +71,3 @@ class YTClient:
             "filesize": self.cur_stream.filesize
         }
 
-
-class StreamWrapper: 
-    """
-    Pre Descrambled stream object 
-    This Handles the dowloading and 
-    """
-
-    def __init__(self, stream):  
-        self._stream = stream
-
-    def __repr__(self):
-        return str(self._stream)
-
-    def download(self):
-        """
-        Download single steam from _stream.url 
-        returns: Buffer 
-        """
-        CHUNK_SIZE = 8192
-        with requests.get(self._stream.url, stream=True) as r: 
-            r.raise_for_status()
-            for chunk in r.iter_content(CHUNK_SIZE):
-                yield chunk
