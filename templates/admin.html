@@ -26,16 +26,34 @@
 
     $("#device").on("click", listDevices)
 
-    async function listDevices(e) {
+
+    function setDevice(event) {
+      event.preventDefault()
+      console.log("setting device")
+      console.log(event.target)
+      device = event.target
+      fetch(`${window.origin}/admin/set-device/${device.getAttribute("did")}`, {method: "put"})
+      .then(res => {
+        if (res.ok) {
+          $("#devicelist").empty()
+          $("#devicelist").append(`<div>Device updated to ${device.getAttribute("name")} ${device.getAttribute("did")}</div>`)
+        }
+        else {
+          $("devicelist").prepend("<div>Error setting device</div>")
+        }
+      }).catch(e => console.log(e))
+    }
+
+    function listDevices(e) {
       e.preventDefault()
       fetch(`${window.origin}/devices`, {
         method: "get"
       }).then(res =>  res.json())
       .then(res => {
-        console.log(res)
         res.devices.forEach((item) => {
-          $("devicelist").append(`<a class="device"><div>${item.dtype}, ${item.name}, ${item.did} <div></a>`)
-        })
+            $("#devicelist").append(`<a class="device-result"  did=${item.did}><div did=${item.did}>${item.dtype}, ${item.name}, ${item.did} </div></a>`);
+          })
+        $(".device-result").click(setDevice)
       }).catch(e => console.log( 
         "Failed getting devices", e
       ))

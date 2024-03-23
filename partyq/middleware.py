@@ -8,11 +8,11 @@ from partyq import logger as log
 logger = log.get_logger(__name__)
 
 async def on_shutdown(app):
-	for ws in app['websockets'].values():
-		try:
-			await ws.close(code=WSCloseCode.GOING_AWAY, message='Server shutdown')
-		except Exception:
-			pass
+    for ws in app['websockets'].values():
+        try:
+            await ws.close(code=WSCloseCode.GOING_AWAY, message='Server shutdown')
+        except Exception:
+            pass
 
 def spam_detector(request: dict, q: Q.QM):
     duplicates = q.get_by_videoid(request["videoId"])

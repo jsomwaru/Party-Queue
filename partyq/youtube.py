@@ -5,9 +5,7 @@ import ytmusicapi
 
 from pytube import YouTube
 
-"""
-THIS IS BULLSHIT
-"""
+
 DATA_DIR="media"
 BROWSER_FILE = os.path.join(DATA_DIR, "browser.json")
 
@@ -62,7 +60,6 @@ class YTClient:
         return self._stream
 
     def metadata(self):
-        print(self.cur_stream)
         return {
             "title": self.cur_stream.title,
             "duration": None,
