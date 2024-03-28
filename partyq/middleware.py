@@ -17,7 +17,7 @@ async def on_shutdown(app):
             pass    
     try:
         for i in app["background_tasks"]:
-            i.cancel()
+            await i.cancel()
     except asyncio.CancelledError:
         pass
 

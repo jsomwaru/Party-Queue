@@ -98,9 +98,12 @@ class DeviceManager:
     
 
     async def get_devices(self, cb):
+        live_devices = {}
         while True:
             device = await self.device_queue.get()
-            resp = await cb(device)
+            if not live_devices.get(device.did) or live_devices.get(device.did).name != device.name:
+                live_devices[device.did] = device
+                resp = await cb(device)
             if resp == False:
                 self.scan_task.cancel()
                 break

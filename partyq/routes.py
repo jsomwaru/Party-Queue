@@ -1,13 +1,13 @@
 import asyncio
 import json
 import urllib.parse
-from hashlib import sha256
 from functools import partial
+from hashlib import sha256
 
+import aiohttp
 import aiohttp_jinja2
 import redis.asyncio as redis
 from aiohttp import web
-import aiohttp
 from aiohttp.web_ws import WebSocketResponse
 from aiohttp_session import get_session
 
@@ -169,6 +169,7 @@ async def list_devices(request: web.Request):
         stream = request.query.get("stream")
         logger.info("Getting streaming %s", str(stream))
         device_manager = DeviceManager()
+        session = await get_session(request)
         if not stream:
             logger.info("Listing devices")
             data = await device_manager.list_devices()
@@ -182,6 +183,7 @@ async def list_devices(request: web.Request):
             await device_manager.list_devices_streaming(event)
             await resp.prepare(request)
             device_callback = partial(middleware.send_device_info, resp)
+            request.app["websockets"][f"device:{session}"] = resp
             try:
                 task: asyncio.Task = asyncio.create_task(device_manager.get_devices(device_callback))
                 task.add_done_callback(request.app["background_tasks"].discard)
