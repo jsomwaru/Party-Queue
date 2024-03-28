@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 import asyncio
-import os
 import hashlib
+import os
+from contextlib import suppress
 
 import aiohttp_jinja2
 import jinja2
@@ -10,11 +11,9 @@ from aiohttp_session import setup
 from aiohttp_session.redis_storage import RedisStorage
 from redis.asyncio import from_url
 
-from partyq import middleware
 from partyq import Q
-from partyq import routes
 from partyq import logger as log
-
+from partyq import middleware, routes
 
 logger = log.get_logger(__name__)
 
@@ -49,6 +48,16 @@ async def init_admin(persistent, file_path="media/.admin_pass"):
         logger.info("Admin user enabled")
         return True
 
+async def background_tasks(app):
+    partyq = asyncio.to_thread(Q.partyQ, app["Q"])
+    task = asyncio.create_task(partyq)
+    app["partyq"] = task
+    yield
+
+    app["partyq"].cancel()
+    with suppress(asyncio.exceptions.CancelledError):
+        await app["partyq"]
+
 async def main():
     q = Q.QM()
     app = web.Application()
@@ -75,11 +84,10 @@ async def main():
         web.put("/admin/set-device/{did}", routes.set_device)
     ])
 
-    app.on_shutdown.append(middleware.on_shutdown)
     app["websockets"] = {}
     app["Q"] = q
+    app["background_tasks"] = set() 
 
-    partyq = asyncio.to_thread(Q.partyQ, q)
-    task = asyncio.create_task(partyq)
-    app["partyq"] = task
+    app.on_shutdown.append(middleware.on_shutdown)
+    app.cleanup_ctx.append(background_tasks)
     return app

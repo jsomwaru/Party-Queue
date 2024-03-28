@@ -1,22 +1,20 @@
+import asyncio
 import json
 import urllib.parse
-
 from hashlib import sha256
+from functools import partial
 
 import aiohttp_jinja2
+import redis.asyncio as redis
 from aiohttp import web
+import aiohttp
 from aiohttp.web_ws import WebSocketResponse
 from aiohttp_session import get_session
 
-import redis.asyncio as redis
-
-from partyq import device
+from partyq import Q, config
 from partyq import logger as log
-from partyq import middleware
-from partyq import Q
-from partyq import youtube
-
-AUTH = "authenticated"
+from partyq import middleware, youtube
+from partyq.device import DeviceManager
 
 logger = log.get_logger(__name__)
 
@@ -46,7 +44,7 @@ async def authenticate(request: web.Request):
             conn = redis.from_url(request.app["redis"])
             admin_pass = await conn.get("admin_password")
             if sha256(password.encode()).hexdigest() == admin_pass.decode():
-                session[AUTH] = True
+                session[config.AUTH] = True
                 res = web.HTTPAccepted()
                 res.set_cookie("authenticated", "1")
                 return res
@@ -147,7 +145,7 @@ async def toggle_playing(request: web.Request):
 async def remove(request: web.Request):
     try:
         session = await get_session(request)
-        if session.get(AUTH):
+        if session.get(config.AUTH):
             qpos = request.match_info["qpos"]
             request.app["Q"].remove(int(qpos))
             user = session.get("username", session.identity)
@@ -168,16 +166,42 @@ async def update_authentication(request: web.Request):
 async def list_devices(request: web.Request):
     # TODO Add authentication
     try:
-        session = await get_session(request)
-        session.get(AUTH)
-        logger.info("Listing devices")
-        device_manager: device.DeviceManager = device.DeviceManager()
-        data = await device_manager.list_devices()
-        logger.debug(f"%d available devices", len(data["devices"]))
-        return web.json_response(data=data, content_type="application/json")
-    except Exception as e:
+        stream = request.query.get("stream")
+        logger.info("Getting streaming %s", str(stream))
+        device_manager = DeviceManager()
+        if not stream:
+            logger.info("Listing devices")
+            data = await device_manager.list_devices()
+            logger.debug(f"%d available devices", len(data["devices"]))
+            return web.json_response(data=data, content_type="application/json")
+        elif stream == "true":
+            logger.info("Listing devices streaming")
+            event = asyncio.Event()
+            event.clear()
+            resp = WebSocketResponse()
+            await device_manager.list_devices_streaming(event)
+            await resp.prepare(request)
+            device_callback = partial(middleware.send_device_info, resp)
+            try:
+                task: asyncio.Task = asyncio.create_task(device_manager.get_devices(device_callback))
+                task.add_done_callback(request.app["background_tasks"].discard)
+                request.app["background_tasks"].add(task)
+                async for req in resp:
+                    if req.type == aiohttp.WSMsgType.TEXT:
+                        data = await req.json() 
+                    if data.get("quit"):
+                        event.set()
+                        raise Exception("Client diconnected")
+            finally:
+                device_manager.scan_task.cancel()
+                task.cancel()
+                await resp.close()
+                logger.exception("")
+                return web.HTTPSuccessful()
+    except Exception:
         logger.exception("error")
         return web.HTTPInternalServerError(text="Error listing devices")
+
 
 async def set_device(request: web.Request):
     # TODO Add authentication
@@ -185,7 +209,7 @@ async def set_device(request: web.Request):
     did = request.match_info["did"]
     if not did:
         return web.HTTPBadRequest(text="No device provided")
-    d = device.DeviceManager()
+    d = DeviceManager()
     succ = await d.set_playback_device(device_id=did)
     if not succ:
         err = {"message": f"Deivce {did} not found"}

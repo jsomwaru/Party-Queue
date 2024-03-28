@@ -36,6 +36,8 @@ class DeviceManager:
 
     def __init__(self):
         self._audio = pyaudio.PyAudio()
+        self.device_queue = asyncio.Queue()
+        self.event = asyncio.Event()
 
     async def _local_devices(self):
         info = self._audio.get_host_api_info_by_index(0)
@@ -48,10 +50,13 @@ class DeviceManager:
         return local_devices
 
     async def _remote_devices(self):
-        devices = await BleakScanner.discover()
+        devices = await BleakScanner.discover(return_adv=True, cb=dict(use_bdaddr=True))
+        print(devices)
         remote_devices = set()
-        for d in devices:
-            print(d)
+        for did, device in devices.items():
+            d, adv = device
+            print(did, adv)
+            print(d.address, d.name)
             remote_devices.add(self.Device(DeviceType.REMOTE, d.address, d.name))
         return remote_devices
     
@@ -91,6 +96,29 @@ class DeviceManager:
         DeviceManager.last_refresh = datetime.now(tz=timezone.utc)
         return self.device_dict()
     
+
+    async def get_devices(self, cb):
+        while True:
+            device = await self.device_queue.get()
+            resp = await cb(device)
+            if resp == False:
+                self.scan_task.cancel()
+                break
+        return
+    
+    
+    async def list_devices_streaming(self, event: asyncio.Event):
+        async def scan():
+            async with BleakScanner(self._device_detection_callback):
+                await event.wait()
+        self.scan_task = asyncio.create_task(scan())
+
+
+    async def _device_detection_callback(self, device, adv_data):
+        logger.info(f"Discovered Device {device}")
+        device = self.Device(DeviceType.REMOTE, device.address, device.name)
+        await self.device_queue.put(device)
+
     def device_dict(self):
         return {
             "devices": [d.asdict() for d in self.devices]

@@ -35,7 +35,6 @@ class YTClient:
         """
         if not self.is_audio_available and not best_effort:
             raise NoStreamFoundException("Audio stream not found")
-        #self._stream = StreamWrapper(self.yt.streams.filter(only_audio=True, mime_type="audio/webm").order_by("abr")[-1])
         self._stream = self.yt.streams.get_audio_only()
 
     @property
