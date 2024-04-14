@@ -73,8 +73,6 @@ class DeviceManager:
             DeviceManager.current_device = device
             DeviceManager.remote_context = BleakClient(device.did)
             await DeviceManager.remote_context.connect()
-            # await DeviceManager.remote_context.get_services()
-            # print(DeviceManager.remote_context.services)
             return True
         elif device.dtype == DeviceType.LOCAL:
             DeviceManager.current_device = device
@@ -101,9 +99,8 @@ class DeviceManager:
         live_devices = {}
         while True:
             device = await self.device_queue.get()
-            if not live_devices.get(device.did) or live_devices.get(device.did).name != device.name:
-                live_devices[device.did] = device
-                resp = await cb(device)
+            live_devices[device.did] = device.asdict()
+            resp = await cb(live_devices)
             if resp == False:
                 self.scan_task.cancel()
                 break
@@ -112,13 +109,13 @@ class DeviceManager:
     
     async def list_devices_streaming(self, event: asyncio.Event):
         async def scan():
-            async with BleakScanner(self._device_detection_callback):
+            async with BleakScanner(self._device_detection_callback, cb=dict(use_bdaddr=True)):
                 await event.wait()
         self.scan_task = asyncio.create_task(scan())
 
 
     async def _device_detection_callback(self, device, adv_data):
-        logger.info(f"Discovered Device {device}")
+        logger.info(f"Discovered Device {device.details}")
         device = self.Device(DeviceType.REMOTE, device.address, device.name)
         await self.device_queue.put(device)
 

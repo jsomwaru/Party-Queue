@@ -26,15 +26,21 @@
     var device_socket;
     $("#device").on("click", listDevicesStreaming)
 
-    function addDeviceToDeviceList(item) {
-      $("#devicelist").append(`<a class="device-result"  did=${item.did}><div did=${item.did}>${item.dtype}, ${item.name}, ${item.did} </div></a>`);
+    function addDevicesToDeviceList(devices) {
+      $("#devicelist").empty()
+      for (const [id, item] of Object.entries(devices)) {
+        console.log(id)
+        console.log(item)
+        $("#devicelist").append(`<a class="device-result"  did=${item.did}><div did=${item.did}>${item.dtype}, ${item.name}, ${item.did} </div></a>`);
+      }
     }
 
     function listDevicesStreaming() {
       device_socket = new WebSocket(`ws://${window.location.hostname}/devices?stream=true`)
       device_socket.addEventListener("message", (event) =>{
         device = JSON.parse(event.data)
-        addDeviceToDeviceList(device)
+        console.log(device)
+        addDevicesToDeviceList(device)
       })
     }
 

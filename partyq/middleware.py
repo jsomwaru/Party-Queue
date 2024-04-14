@@ -6,6 +6,7 @@ from aiohttp_session import get_session
 
 from partyq import Q, config
 from partyq import logger as log
+import json
 
 logger = log.get_logger(__name__)
 
@@ -56,4 +57,4 @@ async def authenticated(route_callback: Callable):
 
 
 async def send_device_info(websocket, device):
-    await websocket.send_json(device.asdict())
+    await websocket.send_json(device)
