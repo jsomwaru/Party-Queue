@@ -9,12 +9,16 @@ from bleak import BleakClient, BleakScanner
 
 from partyq import logger as log
 
+from partyq import config
+
 logger = log.get_logger(__name__)
 
 
 class DeviceType(str, Enum):
     REMOTE = auto()
     LOCAL = auto()
+
+backend = config.get_device_backend()
 
 class DeviceManager:
     """Manage Playback device
@@ -36,10 +40,11 @@ class DeviceManager:
 
     def __init__(self):
         self._audio = pyaudio.PyAudio()
+        self._backend = backend.BluetoothDeviceInquiryDelegate.alloc().init()
         self.device_queue = asyncio.Queue()
         self.event = asyncio.Event()
 
-    async def _local_devices(self):
+    def _local_devices(self):
         info = self._audio.get_host_api_info_by_index(0)
         device_count = info.get("deviceCount")
         local_devices = set()
@@ -49,17 +54,10 @@ class DeviceManager:
                     DeviceType.LOCAL, str(i), self._audio.get_device_info_by_host_api_device_index(0, i).get("name")))
         return local_devices
 
-    async def _remote_devices(self):
-        devices = await BleakScanner.discover(return_adv=True, cb=dict(use_bdaddr=True))
-        print(devices)
-        remote_devices = set()
-        for did, device in devices.items():
-            d, adv = device
-            print(did, adv)
-            print(d.address, d.name)
-            remote_devices.add(self.Device(DeviceType.REMOTE, d.address, d.name))
-        return remote_devices
-    
+    def _remote_devices(self):
+        self._backend.start_scan()
+
+        
     async def set_playback_device(self, device :Device=None, device_id :str=None):
         if not device:
             device = await self.get_deivice_by_did(device_id)
@@ -88,44 +86,23 @@ class DeviceManager:
                 return False
         return True
     
-    async def list_devices(self):
-        results = await asyncio.gather(self._remote_devices(),  self._local_devices())
-        DeviceManager.devices = set.union(*results)
-        DeviceManager.last_refresh = datetime.now(tz=timezone.utc)
-        return self.device_dict()
+    def list_devices(self):
+        self._remote_devices()
+        return True
     
-
-    async def get_devices(self, cb):
-        live_devices = {}
-        while True:
-            device = await self.device_queue.get()
-            live_devices[device.did] = device.asdict()
-            resp = await cb(live_devices)
-            if resp == False:
-                self.scan_task.cancel()
-                break
-        return
+    def get_devices(self):
+        """BAD 
+        This help retrieve devices from the scanning backend 
+        """
+        ret = { }
+        if config.PLATFORM == "darwin": 
+            ret["devices"] =  [ {"dtype": DeviceType.REMOTE, "did": d._.addressString, "name": d._.name} for d in self._backend.found_devices() ]
+            logger.info(ret)
+        elif config.PLATFORM == "linux":
+            logger.error("linux scanning not supported yet")
+        return ret
     
-    
-    async def list_devices_streaming(self, event: asyncio.Event):
-        async def scan():
-            async with BleakScanner(self._device_detection_callback, cb=dict(use_bdaddr=True)):
-                await event.wait()
-        self.scan_task = asyncio.create_task(scan())
-
-
-    async def _device_detection_callback(self, device, adv_data):
-        logger.info(f"Discovered Device {device.details}")
-        device = self.Device(DeviceType.REMOTE, device.address, device.name)
-        await self.device_queue.put(device)
-
-    def device_dict(self):
-        return {
-            "devices": [d.asdict() for d in self.devices]
-        }
-
-    async def get_deivice_by_did(self, did):
-        for d in DeviceManager.devices:
-            if d.did == did:
-                return d
-        return None
+    def run_delegate(self):
+        """Used to execute event loop or handle timeouts in native environments
+        """
+        backend.run()

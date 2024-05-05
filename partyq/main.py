@@ -2,6 +2,7 @@
 import asyncio
 import hashlib
 import os
+import threading
 from contextlib import suppress
 
 import aiohttp_jinja2
@@ -11,7 +12,8 @@ from aiohttp_session import setup
 from aiohttp_session.redis_storage import RedisStorage
 from redis.asyncio import from_url
 
-from partyq import Q
+import partyq.bluetoothd as bluetoothd
+from partyq import Q, device
 from partyq import logger as log
 from partyq import middleware, routes
 
@@ -51,12 +53,26 @@ async def init_admin(persistent, file_path="media/.admin_pass"):
 async def background_tasks(app):
     partyq = asyncio.to_thread(Q.partyQ, app["Q"])
     task = asyncio.create_task(partyq)
+
     app["partyq"] = task
     yield
 
     app["partyq"].cancel()
     with suppress(asyncio.exceptions.CancelledError):
         await app["partyq"]
+
+
+async def scand_task(app):
+    scandthread = asyncio.to_thread(bluetoothd.scand, app)
+    scand_task = asyncio.create_task(scandthread)
+
+    app["scand_task"] = scand_task
+    yield
+
+    app["scand_task"].cancel()
+    with suppress(asyncio.exceptions.CancelledError):
+        await app["scand_task"]
+
 
 async def main():
     q = Q.QM()
@@ -87,7 +103,11 @@ async def main():
     app["websockets"] = {}
     app["Q"] = q
     app["background_tasks"] = set() 
+    app["scand_event"] = threading.Event()
+    app["scand_event"].clear()
+    app["DeviceManager"] = device.DeviceManager()
 
     app.on_shutdown.append(middleware.on_shutdown)
     app.cleanup_ctx.append(background_tasks)
+    # app.cleanup_ctx.append(scand_task)
     return app

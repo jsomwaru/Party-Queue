@@ -168,12 +168,15 @@ async def list_devices(request: web.Request):
     try:
         stream = request.query.get("stream")
         logger.info("Getting streaming %s", str(stream))
-        device_manager = DeviceManager()
+        device_manager = request.app["DeviceManager"]
         session = await get_session(request)
         if not stream:
             logger.info("Listing devices")
-            data = await device_manager.list_devices()
-            logger.debug(f"%d available devices", len(data["devices"]))
+            # device_manager.list_devices()
+            device_manager.list_devices()
+            device_manager.run_delegate()
+            data = device_manager.get_devices()
+            # logger.debug(f"%d available devices", len(data["devices"]))
             return web.json_response(data=data, content_type="application/json")
         elif stream == "true":
             logger.info("Listing devices streaming")
