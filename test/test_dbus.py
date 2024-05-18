@@ -1,10 +1,22 @@
-import dbus
-# for service in dbus.SystemBus().list_names():
-#     print(service)
+import sys
+import os
 
-bus = dbus.SystemBus()
+import time
 
-proxy = bus.get_object('org.bluez',
-                       '/org/bluez/hci0')
+current = os.path.dirname(os.path.realpath(__file__))
+parent = os.path.dirname(current)
+sys.path.append(parent)
 
-print(proxy)
+from partyq.bluetooth.lbm import BluetoothBackend
+
+client = BluetoothBackend()
+client.start_scan()
+
+print("starting scan sleeping for 10 seconds")
+time.sleep(10)
+
+client.stop_scan()
+
+print(client.found_devices())
+
+    

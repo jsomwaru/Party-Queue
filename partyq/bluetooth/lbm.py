@@ -1,4 +1,7 @@
+import sdbus
 from sdbus import DbusInterfaceCommon, dbus_method, dbus_property
+
+from partyq.bluetooth.device_backend import DeviceBackend
 
 BLUETOOTH_SERVICE_NAME = "org.bluez"
 
@@ -25,15 +28,14 @@ class BluetoothManagerInterface(DbusInterfaceCommon,
                                 interface_name="org.freedesktop.DBus.ObjectManager"):
     
     @dbus_method()
-    def GetManagedObject():
+    def get_managed_objects():
         raise NotImplementedError
 
     
-
 class BluetoothDiscoveryLinux(
     BluetoothDiscoveryInterface
 ):
-    def __init__(self, bus):
+    def __init__(self, bus=None):
         super().__init__()
         self.connect(BLUETOOTH_SERVICE_NAME, 
                      BLUETOOTH_INTERFACE_PATH, 
@@ -44,6 +46,25 @@ class BluetoothDiscoveryLinux(
 class BluetoothDeviceManager(
     BluetoothManagerInterface
 ):
-    def __init__(self, bus):
+    def __init__(self, bus=None):
         super().__init__()
         self.connect(BLUETOOTH_SERVICE_NAME, "/", bus)
+
+
+class BluetoothBackend(DeviceBackend):
+
+    def __init__(self):
+        super().__init__()
+        sdbus.set_default_bus(sdbus.sd_bus_open_system())
+        self.device_manager = BluetoothDeviceManager()
+        self.discovery = BluetoothDiscoveryInterface()   
+
+    def start_scan(self):
+        self.discovery.start_discovery()
+
+    def stop_scan(self):
+        self.discovery.stop_discovery()
+
+    def found_devices(self):
+        self.device_manager.get_managed_objects()
+
