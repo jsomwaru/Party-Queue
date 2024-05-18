@@ -1,11 +1,13 @@
 import sdbus
-from sdbus import DbusInterfaceCommon, dbus_method, dbus_property
+from sdbus import DbusInterfaceCommon, dbus_method, dbus_property, DbusObjectManagerInterface
 
 from partyq.bluetooth.device_backend import DeviceBackend
 
 BLUETOOTH_SERVICE_NAME = "org.bluez"
 
 BLUETOOTH_INTERFACE_PATH = "/org/bluez/hci0"
+
+BLUETOOTH_OBJECT_MANAGER_PATH = "/"
 
 
 class BluetoothDiscoveryInterface(DbusInterfaceCommon,
@@ -24,31 +26,38 @@ class BluetoothDiscoveryInterface(DbusInterfaceCommon,
         raise NotImplementedError
 
 
-class BluetoothManagerInterface(DbusInterfaceCommon,
-                                interface_name="org.freedesktop.DBus.ObjectManager"):
+# class BluetoothManagerInterface(DbusInterfaceCommon,
+#                                 interface_name="org.freedesktop.DBus.ObjectManager"):
     
-    @dbus_method()
-    def get_managed_objects():
-        raise NotImplementedError
+#     @dbus_method()
+#     def get_managed_objects():
+#         raise NotImplementedError
 
     
 class BluetoothDiscoveryLinux(
     BluetoothDiscoveryInterface
 ):
     def __init__(self, bus=None):
-        super().__init__()
-        self.connect(BLUETOOTH_SERVICE_NAME, 
-                     BLUETOOTH_INTERFACE_PATH, 
-                     bus
+        super().__init__(
+            BLUETOOTH_SERVICE_NAME, 
+            BLUETOOTH_INTERFACE_PATH, 
+            bus
         )
+        # self.connect(BLUETOOTH_SERVICE_NAME, 
+        #              BLUETOOTH_INTERFACE_PATH, 
+        #              bus
+        # )
 
 
-class BluetoothDeviceManager(
-    BluetoothManagerInterface
-):
-    def __init__(self, bus=None):
-        super().__init__()
-        self.connect(BLUETOOTH_SERVICE_NAME, "/", bus)
+# class BluetoothDeviceManager(
+#     BluetoothManagerInterface
+# ):
+#     def __init__(self, bus=None):
+#         super().__init__()
+#         self.connect(BLUETOOTH_SERVICE_NAME, 
+#                      BLUETOOTH_OBJECT_MANAGER_PATH, 
+#                      bus
+#         )
 
 
 class BluetoothBackend(DeviceBackend):
@@ -56,8 +65,8 @@ class BluetoothBackend(DeviceBackend):
     def __init__(self):
         super().__init__()
         sdbus.set_default_bus(sdbus.sd_bus_open_system())
-        self.device_manager = BluetoothDeviceManager()
-        self.discovery = BluetoothDiscoveryInterface()   
+        self.discovery = BluetoothDiscoveryLinux()   
+        self.device_manager = DbusObjectManagerInterface(BLUETOOTH_SERVICE_NAME, BLUETOOTH_OBJECT_MANAGER_PATH)
 
     def start_scan(self):
         self.discovery.start_discovery()
@@ -66,5 +75,5 @@ class BluetoothBackend(DeviceBackend):
         self.discovery.stop_discovery()
 
     def found_devices(self):
-        self.device_manager.get_managed_objects()
+        return self.device_manager.get_managed_objects()
 
