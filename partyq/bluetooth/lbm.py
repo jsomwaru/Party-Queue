@@ -12,8 +12,8 @@ BLUETOOTH_INTERFACE_PATH = "/org/bluez/hci0"
 BLUETOOTH_OBJECT_MANAGER_PATH = "/"
 
 
-class BluetoothDiscoveryInterface(DbusInterfaceCommon,
-                         interface_name='org.bluez.Adapter1'):
+class BluetoothDiscoveryInterface(DbusInterfaceCommon, 
+                                  interface_name='org.bluez.Adapter1'):
     
     @dbus_method()
     def start_discovery(self):
@@ -47,7 +47,8 @@ class BluetoothBackend(DeviceBackend):
         super().__init__()
         sdbus.set_default_bus(sdbus.sd_bus_open_system())
         self.discovery = BluetoothDiscoveryLinux()   
-        self.device_manager = DbusObjectManagerInterface(BLUETOOTH_SERVICE_NAME, BLUETOOTH_OBJECT_MANAGER_PATH)
+        self.device_manager = DbusObjectManagerInterface(BLUETOOTH_SERVICE_NAME, 
+                                                         BLUETOOTH_OBJECT_MANAGER_PATH)
 
     def start_scan(self):
         self.discovery.start_discovery()

@@ -19,6 +19,6 @@ def get_device_backend():
     if sys.platform == "darwin":
         backend = _lazy_import("partyq.bluetooth.io_bluetooth")
     elif sys.platform == "linux":
-        backend = _lazy_import("partyq.bluetooth.linux")
+        backend = _lazy_import("partyq.bluetooth.lbm")
     return backend
 

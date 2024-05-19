@@ -96,10 +96,24 @@ class DeviceManager:
         """
         ret = { }
         if config.PLATFORM == "darwin": 
-            ret["devices"] =  [ {"dtype": DeviceType.REMOTE, "did": d._.addressString, "name": d._.name} for d in self._backend.found_devices() ]
+            ret["devices"] =  [ 
+                {
+                    "dtype": DeviceType.REMOTE, 
+                    "did": d._.addressString, 
+                    "name": d._.name
+                } 
+                for d in self._backend.found_devices() 
+            ]
             logger.info(ret)
         elif config.PLATFORM == "linux":
-            logger.error("linux scanning not supported yet")
+            ret["devices"] = [ 
+                {
+                    "dtype": DeviceType.REMOTE, 
+                    "did": d['org.bluez.Device1']["Address"][1], 
+                    "name": d['org.bluez.Device1']["Name"][1] 
+                } 
+                for d in self._backend.found_devices() 
+            ]
         return ret
     
     def run_delegate(self):
