@@ -107,7 +107,7 @@ class DeviceManager:
                 {
                     "dtype": DeviceType.REMOTE, 
                     "did": d['org.bluez.Device1']["Address"][1], 
-                    "name": d['org.bluez.Device1']["Name"][1] 
+                    "name": d['org.bluez.Device1']["Name"][1] if "Name" in d['org.bluez.Device1'] else d['org.bluez.Device1']["Alias"][1]
                 } 
                 for d in self._backend.found_devices().values()
             ]
