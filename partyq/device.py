@@ -5,7 +5,6 @@ from datetime import datetime, timezone
 from enum import Enum, auto
 
 import pyaudio
-from bleak import BleakClient, BleakScanner
 
 from partyq import logger as log
 
@@ -69,8 +68,6 @@ class DeviceManager:
             return False
         elif device.dtype == DeviceType.REMOTE:
             DeviceManager.current_device = device
-            DeviceManager.remote_context = BleakClient(device.did)
-            await DeviceManager.remote_context.connect()
             return True
         elif device.dtype == DeviceType.LOCAL:
             DeviceManager.current_device = device
