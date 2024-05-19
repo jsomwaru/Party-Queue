@@ -11,9 +11,6 @@ import objc
 import logging
 
 from partyq.bluetooth.device_backend import DeviceBackend
-# from device_backend import DeviceBackend
-
-# logging.basicConfig()
 
 IOBluetoothDeviceInquiryDelegate = objc.protocolNamed("IOBluetoothDeviceInquiryDelegate")
 
