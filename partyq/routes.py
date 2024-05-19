@@ -176,6 +176,7 @@ async def list_devices(request: web.Request):
             device_manager.list_devices()
             device_manager.run_delegate()
             data = device_manager.get_devices()
+            device_manager.cancel()
             # logger.debug(f"%d available devices", len(data["devices"]))
             return web.json_response(data=data, content_type="application/json")
         elif stream == "true":

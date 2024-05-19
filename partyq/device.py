@@ -117,3 +117,6 @@ class DeviceManager:
         """Used to execute event loop or handle timeouts in native environments
         """
         backend.run()
+
+    def cancel(self):
+        self._backend.stop_scan()
