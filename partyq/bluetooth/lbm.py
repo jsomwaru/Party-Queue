@@ -71,4 +71,6 @@ class BluetoothBackend(DeviceBackend):
                 devices[device] = meta
         return devices 
 
-    
+
+def new_backend():
+    return BluetoothBackend()

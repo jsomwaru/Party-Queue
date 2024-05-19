@@ -39,7 +39,7 @@ class DeviceManager:
 
     def __init__(self):
         self._audio = pyaudio.PyAudio()
-        self._backend = backend.BluetoothDeviceInquiryDelegate.alloc().init()
+        self._backend = backend.new_backend()
         self.device_queue = asyncio.Queue()
         self.event = asyncio.Event()
 

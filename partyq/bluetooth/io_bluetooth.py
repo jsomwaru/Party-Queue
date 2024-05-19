@@ -79,6 +79,9 @@ def run(duration=10):
             print(e)
 
 
+def new_backend():
+    return BluetoothDeviceInquiryDelegate.alloc().init()
+
 # inquiry = IOBluetoothDeviceInquiry.inquiryWithDelegate_(delegate)
 # inquiry = IOBluetoothDeviceInquiry.alloc().init()
 
