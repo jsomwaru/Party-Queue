@@ -147,7 +147,7 @@
     }
 
     form.addEventListener("submit", sendData)
-    let qinfo_url = location.port != '' ? `${window.location.hostname}` : `${window.location.hostname}:${location.port}`
+    let qinfo_url = location.port != '' ?  `${window.location.hostname}:${location.port}` : `${window.location.hostname}`
     const socket = new WebSocket(`ws://${qinfo_url}/qinfo`)
 
     socket.addEventListener("open", (event) => {
