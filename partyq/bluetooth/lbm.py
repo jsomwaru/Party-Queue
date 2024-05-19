@@ -5,6 +5,8 @@ from partyq.bluetooth.device_backend import DeviceBackend
 
 import re
 
+import time
+
 BLUETOOTH_SERVICE_NAME = "org.bluez"
 
 BLUETOOTH_INTERFACE_PATH = "/org/bluez/hci0"
@@ -45,10 +47,11 @@ class BluetoothBackend(DeviceBackend):
 
     def __init__(self):
         super().__init__()
-        sdbus.set_default_bus(sdbus.sd_bus_open_system())
-        self.discovery = BluetoothDiscoveryLinux()   
+        # sdbus.set_default_bus(sdbus.sd_bus_open_system())
+        bus =  sdbus.sd_bus_open_system() 
+        self.discovery = BluetoothDiscoveryLinux(bus)   
         self.device_manager = DbusObjectManagerInterface(BLUETOOTH_SERVICE_NAME, 
-                                                         BLUETOOTH_OBJECT_MANAGER_PATH)
+                                                         BLUETOOTH_OBJECT_MANAGER_PATH, bus)
 
     def start_scan(self):
         self.discovery.start_discovery()
@@ -74,3 +77,7 @@ class BluetoothBackend(DeviceBackend):
 
 def new_backend():
     return BluetoothBackend()
+
+
+def run():
+    time.sleep(BluetoothBackend.DEFAULT_SCAN_DURATION)
