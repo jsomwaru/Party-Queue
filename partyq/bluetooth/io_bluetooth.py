@@ -1,5 +1,5 @@
 import IOBluetooth
-from IOBluetooth import IOBluetoothDeviceInquiry
+from IOBluetooth import IOBluetoothDeviceInquiry, IOBluetoothDevicePair
 from Foundation import NSDefaultRunLoopMode, NSDate 
 
 from AppKit import NSApplication, NSAnyEventMask, NSApplicationDefined
@@ -13,9 +13,10 @@ import logging
 from partyq.bluetooth.device_backend import DeviceBackend
 
 IOBluetoothDeviceInquiryDelegate = objc.protocolNamed("IOBluetoothDeviceInquiryDelegate")
+IOBluetoothDevicePairDelegate = objc.protocolNamed("IOBluetoothDevicePairDelegate")
 
 
-class BluetoothDeviceInquiryDelegate(IOBluetooth.NSObject, DeviceBackend):
+class BluetoothDeviceInquiryDelegate(IOBluetooth.NSObject):
 
     ___pyobjc_protocols__ = [IOBluetoothDeviceInquiryDelegate]
 
@@ -50,6 +51,32 @@ class BluetoothDeviceInquiryDelegate(IOBluetooth.NSObject, DeviceBackend):
     def deviceInquiryComplete_error_aborted_(self, inquiry, err, abortedQ):
         print("error")
 
+class BluetoothDevicePair(IOBluetooth.NSObject):
+    __pyobjc_protocols__ = [IOBluetoothDevicePairDelegate]
+    def init(self):
+        self = objc.super(BluetoothDevicePair, self).init()
+        self.client = IOBluetoothDevicePair.alloc().init()
+        self.client.setDelegate_(self)
+        return self
+    
+    @objc.python_method
+    def device(self):
+        return self.client.device()
+    
+    @objc.python_method
+    def set_device(self, device):
+        self.client.setDevice_(device)
+
+    @objc.python_method
+    def start(self):
+        self.client.start()
+
+    @objc.python_method
+    def stop(self): 
+        self.client.stop()
+
+
+
 
 def run(duration=10):
      app = NSApplication.sharedApplication()
@@ -75,9 +102,29 @@ def run(duration=10):
         else:
             print(e)
 
+class BluetoothBackend(DeviceBackend):
+
+    def __init__(self):
+        self.discovery = BluetoothDeviceInquiryDelegate.alloc().init()
+        self.device_manager = BluetoothDevicePair.alloc().init()
+
+    def start_scan(self):
+        self.discovery.start_scan()
+
+    def stop_scan(self):
+        self.discovery.stop_scan()
+
+    def connect(self, device):
+        self.device_manager.set_device(device)
+        self.device_manager.start()
+        run()
+        self.device_manager.stop()
+
+    def found_devices(self):
+        return self.discovery.found_devices()
 
 def new_backend():
-    return BluetoothDeviceInquiryDelegate.alloc().init()
+    return BluetoothBackend()
 
 # inquiry = IOBluetoothDeviceInquiry.inquiryWithDelegate_(delegate)
 # inquiry = IOBluetoothDeviceInquiry.alloc().init()
