@@ -56,7 +56,7 @@ class BluetoothBackend(DeviceBackend):
         self.discovery.stop_discovery()
 
     def found_devices(self):
-        return self.parse_devices(
+        return self._parse_devices(
             self.device_manager.get_managed_objects()
         )
     
