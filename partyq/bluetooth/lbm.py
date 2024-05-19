@@ -3,6 +3,8 @@ from sdbus import DbusInterfaceCommon, dbus_method, dbus_property, DbusObjectMan
 
 from partyq.bluetooth.device_backend import DeviceBackend
 
+import re
+
 BLUETOOTH_SERVICE_NAME = "org.bluez"
 
 BLUETOOTH_INTERFACE_PATH = "/org/bluez/hci0"
@@ -26,14 +28,6 @@ class BluetoothDiscoveryInterface(DbusInterfaceCommon,
         raise NotImplementedError
 
 
-# class BluetoothManagerInterface(DbusInterfaceCommon,
-#                                 interface_name="org.freedesktop.DBus.ObjectManager"):
-    
-#     @dbus_method()
-#     def get_managed_objects():
-#         raise NotImplementedError
-
-    
 class BluetoothDiscoveryLinux(
     BluetoothDiscoveryInterface
 ):
@@ -43,24 +37,11 @@ class BluetoothDiscoveryLinux(
             BLUETOOTH_INTERFACE_PATH, 
             bus
         )
-        # self.connect(BLUETOOTH_SERVICE_NAME, 
-        #              BLUETOOTH_INTERFACE_PATH, 
-        #              bus
-        # )
-
-
-# class BluetoothDeviceManager(
-#     BluetoothManagerInterface
-# ):
-#     def __init__(self, bus=None):
-#         super().__init__()
-#         self.connect(BLUETOOTH_SERVICE_NAME, 
-#                      BLUETOOTH_OBJECT_MANAGER_PATH, 
-#                      bus
-#         )
 
 
 class BluetoothBackend(DeviceBackend):
+
+    pairable_device_filter = re.compile(r"/org/bluez/hci0/dev_.*")
 
     def __init__(self):
         super().__init__()
@@ -75,5 +56,18 @@ class BluetoothBackend(DeviceBackend):
         self.discovery.stop_discovery()
 
     def found_devices(self):
-        return self.device_manager.get_managed_objects()
+        return self.parse_devices(
+            self.device_manager.get_managed_objects()
+        )
+    
+    def connect(self, device_id: str):
+        self.discovery.register_player([device_id])
+    
+    def _parse_devices(self, found_devices: dict):
+        devices = {}
+        for device, meta in found_devices.items():
+            if re.match(self.pairable_device_filter, device):
+                devices[device] = meta
+        return devices 
 
+    
