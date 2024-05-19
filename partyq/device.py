@@ -109,7 +109,7 @@ class DeviceManager:
                     "did": d['org.bluez.Device1']["Address"][1], 
                     "name": d['org.bluez.Device1']["Name"][1] 
                 } 
-                for d in self._backend.found_devices() 
+                for d in self._backend.found_devices().values()
             ]
         return ret
     
