@@ -8,8 +8,6 @@ import time
 
 import objc
 
-import logging
-
 from partyq.bluetooth.device_backend import DeviceBackend
 
 IOBluetoothDeviceInquiryDelegate = objc.protocolNamed("IOBluetoothDeviceInquiryDelegate")
@@ -76,6 +74,29 @@ class BluetoothDevicePair(IOBluetooth.NSObject):
         self.client.stop()
 
 
+class BluetoothBackend(DeviceBackend):
+
+    def __init__(self):
+        self.discovery = BluetoothDeviceInquiryDelegate.alloc().init()
+        self.device_manager = BluetoothDevicePair.alloc().init()
+
+    def start_scan(self):
+        self.discovery.start_scan()
+
+    def stop_scan(self):
+        self.discovery.stop_scan()
+
+    def connect(self, device):
+        self.device_manager.set_device(device)
+        self.device_manager.start()
+        run()
+        self.device_manager.stop()
+
+    def found_devices(self):
+        return self.discovery.found_devices()
+
+def new_backend():
+    return BluetoothBackend()
 
 
 def run(duration=10):
@@ -102,29 +123,6 @@ def run(duration=10):
         else:
             print(e)
 
-class BluetoothBackend(DeviceBackend):
-
-    def __init__(self):
-        self.discovery = BluetoothDeviceInquiryDelegate.alloc().init()
-        self.device_manager = BluetoothDevicePair.alloc().init()
-
-    def start_scan(self):
-        self.discovery.start_scan()
-
-    def stop_scan(self):
-        self.discovery.stop_scan()
-
-    def connect(self, device):
-        self.device_manager.set_device(device)
-        self.device_manager.start()
-        run()
-        self.device_manager.stop()
-
-    def found_devices(self):
-        return self.discovery.found_devices()
-
-def new_backend():
-    return BluetoothBackend()
 
 # inquiry = IOBluetoothDeviceInquiry.inquiryWithDelegate_(delegate)
 # inquiry = IOBluetoothDeviceInquiry.alloc().init()
