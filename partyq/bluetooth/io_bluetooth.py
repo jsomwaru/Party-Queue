@@ -134,24 +134,3 @@ def run(duration=10):
                 app.postEvent_atStart_(e, True)
     logger.info("Exiting NSApplication Event loop")
 
-
-# inquiry = IOBluetoothDeviceInquiry.inquiryWithDelegate_(delegate)
-# inquiry = IOBluetoothDeviceInquiry.alloc().init()
-
-# inquiry.setDelegate_(delegate)
-
-# inquiry.updateNewDeviceNames()
-
-# delegate = BluetoothDeviceInquiryDelegate.alloc().init()
-# delegate.start_scan()
-# run()
-# print(delegate.client.foundDevices())
-
-
-# delegate.start_scan()
-
-# time.sleep(10)
-
-
-
-
