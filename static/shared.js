@@ -71,7 +71,9 @@ function displayResults(results) {
 }
 
 
-const socket = new WebSocket(`ws://${window.location.hostname}/qinfo`)
+let qinfo_url = location.port != '' ?  `${window.location.hostname}:${location.port}` : `${window.location.hostname}`
+const socket = new WebSocket(`ws://${qinfo_url}/qinfo`)
+
 
 socket.addEventListener("open", (event) => {
   console.log("socket open")

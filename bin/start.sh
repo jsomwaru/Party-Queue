@@ -1,4 +1,7 @@
 #!/bin/bash
+
+pushd $(git rev-parse --show-toplevel)
+
 pushd components/
 id=$(docker ps --filter "name=redis" --format "{{.ID}}")
 if [ -z $id ]

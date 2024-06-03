@@ -11,8 +11,10 @@ def get_logger(name) -> logging.Logger:
     logger = logging.getLogger(name)
     logger.setLevel(level)
     ch = logging.StreamHandler()
+    app_log = logging.FileHandler("media/app.log")
     fmt = logging.Formatter(fmt=FORMAT)
     ch.setFormatter(fmt)
     ch.setLevel(level)
     logger.addHandler(ch)
+    logger.addHandler(app_log)
     return logger

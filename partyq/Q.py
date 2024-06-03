@@ -27,7 +27,7 @@ class QM:
         if len(self._q):
             return self._q.pop(0)
         return None
-    
+
     def get_queue(self, filter=set()):
         if not len(filter):
             return self._q
@@ -38,24 +38,24 @@ class QM:
                 entry[k] = v.get(k)
             ret.append(entry)
         return ret
-    
+
     def peek(self):
         if len(self._q):
             return self._q[0]
         return {}
-    
+
     def get_by_videoid(self, vid):
-        return [ entry for entry in self._q 
+        return [ entry for entry in self._q
             if entry["videoId"] == vid
         ]
-    
+
     def time_callback(self, t):
         self.peek()["pos"] += (t / 1000)
 
     def remove(self, qpos):
         if qpos and qpos < len(self._q) and qpos > 0:
             del self._q[qpos]
-    
+
 
 def download(vid: str):
     buffer = BytesIO()
@@ -85,7 +85,7 @@ def play_pyaudio(seg, time_callback):
 
 
 def partyQ(q: QM):
-    logger.info("Starting PartyQ") 
+    logger.info("Starting PartyQ")
     while 1:
         meta = q.peek()
         vid = meta.get("videoId")
