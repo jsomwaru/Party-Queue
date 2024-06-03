@@ -41,7 +41,7 @@ async def init_admin(persistent, file_path="media/.admin_pass"):
         admin_pass = f.read().strip()
         if len(admin_pass) >= 8:
             await persistent.set(
-                "admin_password", 
+                "admin_password",
                 hashlib.sha256(admin_pass.encode()).hexdigest()
             )
         else:
@@ -73,13 +73,13 @@ async def main():
     setup(app, storage)
     app.middlewares.append(middleware.unset_cookies)
     app.add_routes([
-        web.get('/', routes.getreq), 
+        web.get('/', routes.getreq),
         web.post('/', routes.songreq),
         web.post('/add', routes.add),
         web.get('/qinfo', routes.QWatcher),
         web.post('/setuser', routes.add_username),
         web.get('/toggle', routes.toggle_playing),
-        web.delete("/remove/{qpos:\d+}", routes.remove), 
+        web.delete("/remove/{qpos:\d+}", routes.remove),
         web.static('/static', "static"),
         web.get("/admin", routes.getadmin),
         web.post("/admin/auth", routes.authenticate),
@@ -90,7 +90,7 @@ async def main():
 
     app["websockets"] = {}
     app["Q"] = q
-    app["background_tasks"] = set() 
+    app["background_tasks"] = set()
     app["scand_event"] = threading.Event()
     app["scand_event"].clear()
     app["DeviceManager"] = device.DeviceManager()

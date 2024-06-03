@@ -14,17 +14,17 @@ BLUETOOTH_INTERFACE_PATH = "/org/bluez/hci0"
 BLUETOOTH_OBJECT_MANAGER_PATH = "/"
 
 
-class BluetoothDiscoveryInterface(DbusInterfaceCommon, 
+class BluetoothDiscoveryInterface(DbusInterfaceCommon,
                                   interface_name='org.bluez.Adapter1'):
-    
+
     @dbus_method()
     def start_discovery(self):
         raise NotImplementedError
-    
+
     @dbus_method()
     def stop_discovery(self):
         raise NotImplementedError
-    
+
     @dbus_method("oa{sv}")
     def register_player(self, player: list):
         raise NotImplementedError
@@ -44,15 +44,15 @@ class BluetoothDeviceInterface(DbusInterfaceCommon,
     def disconnect():
         raise NotImplementedError
 
-    
+
 # DbusObjectManagerInterface is provided by sdbus
 class BluetoothDiscoveryLinux(
     BluetoothDiscoveryInterface
 ):
     def __init__(self, bus=None):
         super().__init__(
-            BLUETOOTH_SERVICE_NAME, 
-            BLUETOOTH_INTERFACE_PATH, 
+            BLUETOOTH_SERVICE_NAME,
+            BLUETOOTH_INTERFACE_PATH,
             bus
         )
 
@@ -72,9 +72,9 @@ class BluetoothBackend(DeviceBackend):
     def __init__(self):
         super().__init__()
         # sdbus.set_default_bus(sdbus.sd_bus_open_system())
-        bus =  sdbus.sd_bus_open_system() 
+        bus =  sdbus.sd_bus_open_system()
         self.discovery = BluetoothDiscoveryLinux(bus)
-        self.device_manager = DbusObjectManagerInterface(BLUETOOTH_SERVICE_NAME, 
+        self.device_manager = DbusObjectManagerInterface(BLUETOOTH_SERVICE_NAME,
                                                          BLUETOOTH_OBJECT_MANAGER_PATH, bus)
 
     def start_scan(self):
@@ -87,7 +87,7 @@ class BluetoothBackend(DeviceBackend):
         return self._parse_devices(
             self.device_manager.get_managed_objects()
         )
-    
+
     def connect(self, device_id: str) -> BluetoothDevice:
         bus = sdbus.sd_bus_open_system()
         device_path = self.get_deivce_path_by_id(device_id)
@@ -99,14 +99,14 @@ class BluetoothBackend(DeviceBackend):
         for device_path, meta in self.found_devices().items():
             if meta['org.bluez.Device1']["Address"][1] == device_id:
                 return device_path
-    
-    
+
+
     def _parse_devices(self, found_devices: dict):
         devices = {}
         for device, meta in found_devices.items():
             if re.match(self.pairable_device_filter, device):
                 devices[device] = meta
-        return devices 
+        return devices
 
 def new_backend():
     return BluetoothBackend()

@@ -28,7 +28,7 @@ class BluetoothDeviceInquiryDelegate(IOBluetooth.NSObject):
     def start_scan(self):
         print("starting scan")
         self.client.start()
-    
+
     @objc.python_method
     def stop_scan(self):
         self.client.stop()
@@ -57,11 +57,11 @@ class BluetoothDevicePair(IOBluetooth.NSObject):
         self.client = IOBluetoothDevicePair.alloc().init()
         self.client.setDelegate_(self)
         return self
-    
+
     @objc.python_method
     def device(self):
         return self.client.device()
-    
+
     @objc.python_method
     def set_device(self, device):
         self.client.setDevice_(device)
@@ -71,7 +71,7 @@ class BluetoothDevicePair(IOBluetooth.NSObject):
         self.client.start()
 
     @objc.python_method
-    def stop(self): 
+    def stop(self):
         self.client.stop()
 
 
@@ -102,7 +102,7 @@ class BluetoothBackend(DeviceBackend):
                 break
         else:
             logger.info("Device %s not found in %d devices", device_id, len(self.found_devices()))
-            return 
+            return
 
     def found_devices(self):
         return self.discovery.found_devices()
@@ -129,7 +129,7 @@ def run(duration=10):
         if e is not None:
             if (e.type() == NSApplicationDefined):
                 print(e)
-                return True    
+                return True
             else:
                 app.postEvent_atStart_(e, True)
     logger.info("Exiting NSApplication Event loop")

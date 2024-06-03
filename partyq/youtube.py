@@ -44,13 +44,13 @@ class YTClient:
     @property
     def is_audio_available(self):
         return self.streams.get_audio_only() is not None
-    
+
     def streams_to_json(self):
         return self.yt.metadata
 
     def download_stream(self, buffer: BytesIO):
         self.cur_stream.stream_to_buffer(buffer)
-        buffer.seek(0)   
+        buffer.seek(0)
 
     @property
     def cur_stream(self):
@@ -63,7 +63,7 @@ class YTClient:
             "title": self.cur_stream.title,
             "duration": None,
             "format": self.cur_stream.mime_type,
-            "abr": self.cur_stream.abr, 
+            "abr": self.cur_stream.abr,
             "filesize": self.cur_stream.filesize
         }
 

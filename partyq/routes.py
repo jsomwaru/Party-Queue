@@ -177,7 +177,7 @@ async def list_devices(request: web.Request):
             device_manager.run_delegate()
             data = device_manager.get_devices()
             device_manager.cancel()
-            if config.PLATFORM == 'darwin': 
+            if config.PLATFORM == 'darwin':
                 device_manager.run_delegate(1)
             # logger.debug(f"%d available devices", len(data["devices"]))
             return web.json_response(data=data, content_type="application/json")
@@ -196,7 +196,7 @@ async def list_devices(request: web.Request):
                 request.app["background_tasks"].add(task)
                 async for req in resp:
                     if req.type == aiohttp.WSMsgType.TEXT:
-                        data = await req.json() 
+                        data = await req.json()
                     if data.get("quit"):
                         event.set()
                         raise Exception("Client diconnected")
@@ -227,4 +227,3 @@ async def set_device(request: web.Request):
     device_dict = {}
     device_dict.update({"msg": "Current Device Set Sucessfully"})
     return web.json_response(data=device_dict, content_type="application/json")
-    

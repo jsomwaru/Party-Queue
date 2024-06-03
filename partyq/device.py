@@ -31,11 +31,11 @@ class DeviceManager:
     devices = None
 
     local_device_id = re.compile("$\d^")
-    
+
     @dataclass
     class Device:
         dtype: DeviceType
-        did: str 
+        did: str
         name: str
         def __eq__(self, other): return self.did == other.did and self.dtype == other.dtype
         def __hash__(self): return hash((self.dtype, self.did, self.name))
@@ -60,7 +60,7 @@ class DeviceManager:
     def _remote_devices(self):
         self._backend.start_scan()
 
-        
+
     async def set_playback_device(self, device_id :str=None):
 
         if not device_id:
@@ -80,38 +80,38 @@ class DeviceManager:
                 logger.exception("Encountered error while disconnecting")
                 return False
         return True
-    
+
     def list_devices(self):
         self._remote_devices()
         return True
-    
+
     def get_devices(self):
-        """BAD 
-        This help retrieve devices from the scanning backend 
+        """BAD
+        This help retrieve devices from the scanning backend
         """
         ret = { }
-        if config.PLATFORM == "darwin": 
+        if config.PLATFORM == "darwin":
             # self.devices = self._backend.found_devices()
-            ret["devices"] =  [ 
+            ret["devices"] =  [
                 {
-                    "dtype": DeviceType.REMOTE, 
-                    "did": d._.addressString, 
+                    "dtype": DeviceType.REMOTE,
+                    "did": d._.addressString,
                     "name": d._.name
-                } 
-                for d in self._backend.found_devices() 
+                }
+                for d in self._backend.found_devices()
             ]
             logger.info(ret)
         elif config.PLATFORM == "linux":
-            ret["devices"] = [ 
+            ret["devices"] = [
                 {
-                    "dtype": DeviceType.REMOTE, 
-                    "did": d['org.bluez.Device1']["Address"][1], 
+                    "dtype": DeviceType.REMOTE,
+                    "did": d['org.bluez.Device1']["Address"][1],
                     "name": d['org.bluez.Device1']["Name"][1] if "Name" in d['org.bluez.Device1'] else d['org.bluez.Device1']["Alias"][1]
-                } 
+                }
                 for d in self._backend.found_devices().values()
             ]
         return ret
-    
+
     def run_delegate(self,duration=10):
         """Used to execute event loop or handle timeouts in native environments
         """

@@ -15,7 +15,7 @@ async def on_shutdown(app):
         try:
             await ws.close(code=WSCloseCode.GOING_AWAY, message='Server shutdown')
         except Exception:
-            pass    
+            pass
     try:
         for i in app["background_tasks"]:
             await i.cancel()
@@ -28,7 +28,7 @@ def spam_detector(request: dict, q: Q.QM):
     queue = q.get_queue()
     logger.info("Found %d duplicates", len(duplicates))
     if len(queue) == 0 or (len(duplicates) / (len(queue) + 1) < 0.05 and queue[-1].get("videoId") != request["videoId"]):
-        return True 
+        return True
     return False
 
 @web.middleware
