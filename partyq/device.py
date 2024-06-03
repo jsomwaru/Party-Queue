@@ -10,6 +10,8 @@ from partyq import logger as log
 
 from partyq import config
 
+import re
+
 logger = log.get_logger(__name__)
 
 
@@ -26,7 +28,9 @@ class DeviceManager:
     current_device = None
     remote_context = None
     last_refresh = None
-    devices = set()
+    devices = None
+
+    local_device_id = re.compile("$\d^")
     
     @dataclass
     class Device:
@@ -57,22 +61,16 @@ class DeviceManager:
         self._backend.start_scan()
 
         
-    async def set_playback_device(self, device :Device=None, device_id :str=None):
-        if not device:
-            device = await self.get_deivice_by_did(device_id)
+    async def set_playback_device(self, device_id :str=None):
 
-        if self.remote_context:
-            await self.disconnect()
-
-        if not device:
+        if not device_id:
             return False
-        elif device.dtype == DeviceType.REMOTE:
-            DeviceManager.current_device = device
+        elif not re.match(self.local_device_id, device_id):
+            DeviceManager.current_device = device_id
+            self._backend.connect(device_id)
             return True
-        elif device.dtype == DeviceType.LOCAL:
-            DeviceManager.current_device = device
-            DeviceManager.remote_context = None
-            return True
+        else:
+            logger.info("Local device not implemented")
 
     async def disconnect(self):
         if self.current_device and self.current_device.dtype == DeviceType.REMOTE:
@@ -93,6 +91,7 @@ class DeviceManager:
         """
         ret = { }
         if config.PLATFORM == "darwin": 
+            # self.devices = self._backend.found_devices()
             ret["devices"] =  [ 
                 {
                     "dtype": DeviceType.REMOTE, 
@@ -113,10 +112,10 @@ class DeviceManager:
             ]
         return ret
     
-    def run_delegate(self):
+    def run_delegate(self,duration=10):
         """Used to execute event loop or handle timeouts in native environments
         """
-        backend.run()
+        backend.run(duration=duration)
 
     def cancel(self):
         self._backend.stop_scan()

@@ -62,18 +62,6 @@ async def background_tasks(app):
         await app["partyq"]
 
 
-async def scand_task(app):
-    scandthread = asyncio.to_thread(bluetoothd.scand, app)
-    scand_task = asyncio.create_task(scandthread)
-
-    app["scand_task"] = scand_task
-    yield
-
-    app["scand_task"].cancel()
-    with suppress(asyncio.exceptions.CancelledError):
-        await app["scand_task"]
-
-
 async def main():
     q = Q.QM()
     app = web.Application()

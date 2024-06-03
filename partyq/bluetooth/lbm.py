@@ -1,11 +1,11 @@
+import re
+import time
+
 import sdbus
-from sdbus import DbusInterfaceCommon, dbus_method, dbus_property, DbusObjectManagerInterface
+from sdbus import (DbusInterfaceCommon, DbusObjectManagerInterface,
+                   dbus_method)
 
 from partyq.bluetooth.device_backend import DeviceBackend
-
-import re
-
-import time
 
 BLUETOOTH_SERVICE_NAME = "org.bluez"
 
@@ -30,6 +30,22 @@ class BluetoothDiscoveryInterface(DbusInterfaceCommon,
         raise NotImplementedError
 
 
+class BluetoothDeviceInterface(DbusInterfaceCommon,
+                               interface_name="org.bluez.Device1"):
+    @dbus_method()
+    def connect():
+        raise NotImplementedError
+
+    @dbus_method()
+    def pair():
+        raise NotImplementedError
+
+    @dbus_method()
+    def disconnect():
+        raise NotImplementedError
+
+    
+# DbusObjectManagerInterface is provided by sdbus
 class BluetoothDiscoveryLinux(
     BluetoothDiscoveryInterface
 ):
@@ -41,6 +57,14 @@ class BluetoothDiscoveryLinux(
         )
 
 
+class BluetoothDevice(BluetoothDeviceInterface):
+    def __init__(self, device_path: str, bus=None):
+        super().__init__(
+            BLUETOOTH_SERVICE_NAME,
+            device_path,
+            bus
+        )
+
 class BluetoothBackend(DeviceBackend):
 
     pairable_device_filter = re.compile(r"/org/bluez/hci0/dev_.*")
@@ -49,7 +73,7 @@ class BluetoothBackend(DeviceBackend):
         super().__init__()
         # sdbus.set_default_bus(sdbus.sd_bus_open_system())
         bus =  sdbus.sd_bus_open_system() 
-        self.discovery = BluetoothDiscoveryLinux(bus)   
+        self.discovery = BluetoothDiscoveryLinux(bus)
         self.device_manager = DbusObjectManagerInterface(BLUETOOTH_SERVICE_NAME, 
                                                          BLUETOOTH_OBJECT_MANAGER_PATH, bus)
 
@@ -64,8 +88,18 @@ class BluetoothBackend(DeviceBackend):
             self.device_manager.get_managed_objects()
         )
     
-    def connect(self, device_id: str):
-        self.discovery.register_player([device_id])
+    def connect(self, device_id: str) -> BluetoothDevice:
+        bus = sdbus.sd_bus_open_system()
+        device_path = self.get_deivce_path_by_id(device_id)
+        device = BluetoothDevice(device_path, bus)
+        device.connect()
+        return device
+
+    def get_device_path_by_id(self, device_id: str):
+        for device_path, meta in self.found_devices().items():
+            if meta['org.bluez.Device1']["Address"][1] == device_id:
+                return device_path
+    
     
     def _parse_devices(self, found_devices: dict):
         devices = {}
@@ -73,7 +107,6 @@ class BluetoothBackend(DeviceBackend):
             if re.match(self.pairable_device_filter, device):
                 devices[device] = meta
         return devices 
-
 
 def new_backend():
     return BluetoothBackend()

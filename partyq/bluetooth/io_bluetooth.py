@@ -1,14 +1,15 @@
-import IOBluetooth
-from IOBluetooth import IOBluetoothDeviceInquiry, IOBluetoothDevicePair
-from Foundation import NSDefaultRunLoopMode, NSDate 
-
-from AppKit import NSApplication, NSAnyEventMask, NSApplicationDefined
-
 import time
 
+import IOBluetooth
 import objc
+from AppKit import NSAnyEventMask, NSApplication, NSApplicationDefined
+from Foundation import NSDate, NSDefaultRunLoopMode
+from IOBluetooth import IOBluetoothDeviceInquiry, IOBluetoothDevicePair
 
 from partyq.bluetooth.device_backend import DeviceBackend
+from partyq.logger import get_logger
+
+logger = get_logger(__name__)
 
 IOBluetoothDeviceInquiryDelegate = objc.protocolNamed("IOBluetoothDeviceInquiryDelegate")
 IOBluetoothDevicePairDelegate = objc.protocolNamed("IOBluetoothDevicePairDelegate")
@@ -40,14 +41,14 @@ class BluetoothDeviceInquiryDelegate(IOBluetooth.NSObject):
         print(args)
 
     def deviceInquiryStarted_(self, arg):
-        # self.discovered(arg)
-        print("inquiry started")
+        logger.info("Inquiry started")
 
     def deviceInquiryUpdatingDeviceNamesStarted_devicesRemaining_(self, a, b):
-        print("deviceInquiryUpdatingDeviceNamesStarted_devicesRemaining_")
+        logger.error("deviceInquiryUpdatingDeviceNamesStarted_devicesRemaining_: %s, %s", a, b)
 
-    def deviceInquiryComplete_error_aborted_(self, inquiry, err, abortedQ):
-        print("error")
+    def deviceInquiryComplete_error_aborted_(self, inquiry, err, aborted):
+        logger.error("Encountered error %s during %s aborted %s", err, inquiry, aborted)
+        return
 
 class BluetoothDevicePair(IOBluetooth.NSObject):
     __pyobjc_protocols__ = [IOBluetoothDevicePairDelegate]
@@ -86,11 +87,22 @@ class BluetoothBackend(DeviceBackend):
     def stop_scan(self):
         self.discovery.stop_scan()
 
-    def connect(self, device):
-        self.device_manager.set_device(device)
-        self.device_manager.start()
-        run()
-        self.device_manager.stop()
+    def connect(self, device_id):
+        device = None
+        logger.info("Device Cache %s", self.found_devices())
+        for d in self.found_devices():
+            if d._.addressString == device_id:
+                logger.info("device found")
+                self.device_manager.set_device(device)
+                status_code = self.device_manager.start()
+                logger.info("device pairing starting status code: %s", status_code)
+                run()
+                self.device_manager.stop()
+                run(duration=1)
+                break
+        else:
+            logger.info("Device %s not found in %d devices", device_id, len(self.found_devices()))
+            return 
 
     def found_devices(self):
         return self.discovery.found_devices()
@@ -100,14 +112,14 @@ def new_backend():
 
 
 def run(duration=10):
-     app = NSApplication.sharedApplication()
-     start = time.time()
-     timeout = start + duration
-     print("NSapplication", app)
-     while True:
+    app = NSApplication.sharedApplication()
+    start = time.time()
+    timeout = start + duration
+    logger.info("Starting NSApplication")
+    while True:
         cur_time = time.time()
         if cur_time > timeout:
-             break
+                break
         try:
             e = app.nextEventMatchingMask_untilDate_inMode_dequeue_(NSAnyEventMask, NSDate.dateWithTimeIntervalSinceNow_(timeout - cur_time), NSDefaultRunLoopMode, True)
         except Exception as e:
@@ -120,8 +132,7 @@ def run(duration=10):
                 return True    
             else:
                 app.postEvent_atStart_(e, True)
-        else:
-            print(e)
+    logger.info("Exiting NSApplication Event loop")
 
 
 # inquiry = IOBluetoothDeviceInquiry.inquiryWithDelegate_(delegate)

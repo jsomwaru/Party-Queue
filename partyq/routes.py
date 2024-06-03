@@ -177,6 +177,8 @@ async def list_devices(request: web.Request):
             device_manager.run_delegate()
             data = device_manager.get_devices()
             device_manager.cancel()
+            if config.PLATFORM == 'darwin': 
+                device_manager.run_delegate(1)
             # logger.debug(f"%d available devices", len(data["devices"]))
             return web.json_response(data=data, content_type="application/json")
         elif stream == "true":
@@ -215,13 +217,14 @@ async def set_device(request: web.Request):
     did = request.match_info["did"]
     if not did:
         return web.HTTPBadRequest(text="No device provided")
-    d = DeviceManager()
+    d: DeviceManager = request.app["DeviceManager"]
     succ = await d.set_playback_device(device_id=did)
     if not succ:
         err = {"message": f"Deivce {did} not found"}
-        logger.info(f"{did} {d.device_dict()}")
+        logger.info(f"{did} {d.get_devices()}")
         return web.HTTPNotFound(text=json.dumps(err))
-    device_dict = d.current_device.asdict()
+    # device_dict = d.current_device.asdict()
+    device_dict = {}
     device_dict.update({"msg": "Current Device Set Sucessfully"})
     return web.json_response(data=device_dict, content_type="application/json")
     
