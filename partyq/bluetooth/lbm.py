@@ -111,6 +111,5 @@ class BluetoothBackend(DeviceBackend):
 def new_backend():
     return BluetoothBackend()
 
-
-def run():
-    time.sleep(BluetoothBackend.DEFAULT_SCAN_DURATION)
+def run(duration=BluetoothBackend.DEFAULT_SCAN_DURATION):
+    time.sleep(duration)
