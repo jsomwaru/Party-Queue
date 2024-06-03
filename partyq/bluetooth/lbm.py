@@ -90,7 +90,7 @@ class BluetoothBackend(DeviceBackend):
 
     def connect(self, device_id: str) -> BluetoothDevice:
         bus = sdbus.sd_bus_open_system()
-        device_path = self.get_deivce_path_by_id(device_id)
+        device_path = self.get_device_path_by_id(device_id)
         device = BluetoothDevice(device_path, bus)
         device.connect()
         return device
