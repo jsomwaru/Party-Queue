@@ -91,7 +91,6 @@ class DeviceManager:
         """
         ret = { }
         if config.PLATFORM == "darwin":
-            # self.devices = self._backend.found_devices()
             ret["devices"] =  [
                 {
                     "dtype": DeviceType.REMOTE,

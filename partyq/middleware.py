@@ -6,7 +6,6 @@ from aiohttp_session import get_session
 
 from partyq import Q, config
 from partyq import logger as log
-import json
 
 logger = log.get_logger(__name__)
 

@@ -12,7 +12,6 @@ from aiohttp_session import setup
 from aiohttp_session.redis_storage import RedisStorage
 from redis.asyncio import from_url
 
-import partyq.bluetoothd as bluetoothd
 from partyq import Q, device
 from partyq import logger as log
 from partyq import middleware, routes
