@@ -1,22 +1,21 @@
 <template>
-  <QInput input-label="Song:" input-type="text"/>
+  <QInput input-label="Song:" input-type="text" ref="searchResults" />
   <QInput input-label="Username:" input-type="text"/>
-  <QList role="results"></Qlist>
+  <QList role="results" ></Qlist>
   <QList role="queue"></QList>
 </template>
 
 <script setup>
-import QList from './components/QList.vue';
-import QInput from './components/QInput.vue';
-// import {ref} from 'vue';
-// let queue = ref(null)
-// let results = ref(null)
+  import QList from './components/QList.vue';
+  import QInput from './components/QInput.vue';
 
-const socket = new WebSocket(`ws://${window.location.hostname}/qinfo`)
+  import { ref, onMounted } from 'vue';
 
-socket.addEventListener("open", () => {
-  console.log("socket open")
-})
+  const searchResults = ref(null)
+
+  onMounted(() => {
+    console.log(searchResults.value)
+  })
 
 </script>
 

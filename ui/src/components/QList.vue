@@ -1,37 +1,41 @@
 <script setup>
   import QListItem from './QListItem.vue';
-  import { defineProps, defineExpose } from 'vue';
-
-  import {ref} from 'vue';
-  var data = ref([]); 
+  import { defineProps, ref } from 'vue';
 
   defineProps({
-    role: String
+    role: String,
   })
 
-  defineExpose({
-    data
+  // eslint-disable-next-line no-unused-vars
+  var queue = ref([])
+
+  let qinfo_url = location.port != '' ?  `${window.location.hostname}:${location.port}` : `${window.location.hostname}`
+  const socket = new WebSocket(`ws://${qinfo_url}/qinfo`)
+
+  socket.addEventListener("open", () => {
+    console.log("socket open")
   })
+
+  socket.addEventListener("message", (event) => {
+    let qdata = JSON.parse(event.data)
+    console.log(qdata)
+    queue.value = qdata
+  })
+
+  setInterval((socket) => {socket.send("inquire")}, 5000, socket)
+
 </script>
 
 <template>
-  <div v-if="role==='queue'" class="qtable">
-    <template v-for="item in data" :key="item.videoId">
-      <QListItem :title="item.title" 
-      :img_link="item.thumbnails[0].url"
+
+  <template v-for="item in queue" :key="item.videoId">
+    <QListItem 
+      :title="item.title"
       :requested_by="item.requestor"
-      :video_id="item.videoId"
-      :timing_info="item.pos"></QListItem>
-    </template>
-  </div>
-  <div v-else-if="role==='results'" class="qtable">
-    <template  v-for="item in data" :key="item.videoId">
-      <a videoId={{ item.videoId }}>
-        <QListItem :title="item.title" 
-        :img_link="item.thumbnails[0].url"
-        :video_id="item.videoId">
-        </QListItem>
-      </a>
-    </template>
-  </div>
+      :video-id="item.videoId"
+      :img-link="item.thumbnails[0].url"
+      :timing-info="item.pos">
+    </QListItem>
+  </template>
+
 </template>

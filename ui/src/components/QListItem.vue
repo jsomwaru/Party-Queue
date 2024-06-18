@@ -1,9 +1,9 @@
 <template>
   <div class="item">
-    <img class="block" src={{ img_link }} width="50px" height="50px">
+    <img class="block" :src="imgLink" width="50" height="50">
     <p class="block">{{ title }}</p>
-    <p v-if="requested_by">{{ requested_by }}</p>
-    <p v-if="timing_info" id="timing-info">{{ timing_info }}</p>
+    <p  class="block" v-if="requestedBy">{{ requestedBy }}</p>
+    <p class="block" v-if="timingInfo" id="timing-info">{{ timingInfo }}</p>
   </div>
 </template>
 
@@ -12,10 +12,10 @@
     name: 'QListItem',
     props: {
       title: String,
-      img_link: String,
-      requested_by: String,
-      video_id: String,
-      timing_info: String
+      imgLink: String,
+      requestedBy: String,
+      videoId: String,
+      timingInfo: String
     },
   }
 </script>
@@ -23,6 +23,7 @@
 <style>
   .block {
     display: inline-block;
+    padding-left: 10px;
   }
 
   .item {
