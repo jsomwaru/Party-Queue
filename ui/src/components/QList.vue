@@ -6,19 +6,17 @@
     role: String,
   })
 
-  // eslint-disable-next-line no-unused-vars
   var queue = ref([])
 
   let qinfo_url = location.port != '' ?  `${window.location.hostname}:${location.port}` : `${window.location.hostname}`
   const socket = new WebSocket(`ws://${qinfo_url}/qinfo`)
 
   socket.addEventListener("open", () => {
-    console.log("socket open")
+    console.log("---Connected to Queue---")
   })
 
   socket.addEventListener("message", (event) => {
     let qdata = JSON.parse(event.data)
-    console.log(qdata)
     queue.value = qdata
   })
 
