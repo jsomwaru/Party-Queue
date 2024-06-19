@@ -1,6 +1,6 @@
 <template>
   <template  v-for="item in results.results" :key="item.videoId">
-    <a>
+    <a @click="addToQueue">
       <QListItem
         :title="item.title"
         :video-id="item.videoId"
@@ -13,7 +13,15 @@
 <script setup>
   import QListItem from "./QListItem.vue"
   import {defineProps} from "vue"
-  defineProps({
+
+  const props = defineProps({
     results: Array
   })
+
+  const addToQueue = async (event) => {
+    let videoId = event.target.getAttribute("video-id")
+    let req = {videoId}
+    await props.results.submit(req)
+  }
+
 </script>

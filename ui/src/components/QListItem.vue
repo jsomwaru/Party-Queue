@@ -1,9 +1,9 @@
 <template>
-  <div class="item">
-    <img class="block" :src="imgLink" width="50" height="50">
-    <p class="block">{{ title }}</p>
-    <p  class="block" v-if="requestedBy">{{ requestedBy }}</p>
-    <p class="block" v-if="timingInfo" id="timing-info">{{ timingInfo }}</p>
+  <div class="item" :video-id="videoId">
+    <img class="block" :src="imgLink" width="50" height="50" :video-id="videoId">
+    <p class="block" :video-id="videoId">{{ title }}</p>
+    <p class="block" v-if="requestedBy" :video-id="videoId">{{ requestedBy }}</p>
+    <p class="block" v-if="timingInfo" id="timing-info" :video-id="videoId">{{ timingInfo }}</p>
   </div>
 </template>
 

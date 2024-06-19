@@ -78,6 +78,7 @@ async def add(request: web.Request):
     session = await get_session(request)
     try:
         video_id = data["videoId"]
+        logger.info(video_id)
         metadata = None
         cache = session.get("cache")
         if not cache:

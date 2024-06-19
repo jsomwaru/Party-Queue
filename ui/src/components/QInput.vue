@@ -22,8 +22,8 @@
   })
 
   defineExpose({
-    results
-
+    results,
+    submit
   })
 
   async function search(event) {
@@ -40,9 +40,12 @@
   }
 
   async function submit(songreq) {
-    var res = await fetch(`${window.origin}/submit`, { 
-      method: "post"
+    var res = await fetch(`${window.origin}/add`, { 
+      method: "post",
+      body: JSON.stringify(songreq)
     })
+    if (res.ok)
+      return 
   }
 
 </script>
