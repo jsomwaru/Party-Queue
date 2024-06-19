@@ -1,21 +1,18 @@
 <template>
   <QInput input-label="Song:" input-type="text" ref="searchResults" />
   <QInput input-label="Username:" input-type="text"/>
-  <QList role="results" ></Qlist>
+  <ResultList :results="searchResults" ></ResultList>
   <QList role="queue"></QList>
 </template>
 
 <script setup>
   import QList from './components/QList.vue';
   import QInput from './components/QInput.vue';
+  import ResultList from "./components/ResultList.vue"
 
-  import { ref, onMounted } from 'vue';
+  import { ref } from 'vue';
 
-  const searchResults = ref(null)
-
-  onMounted(() => {
-    console.log(searchResults.value)
-  })
+  const searchResults = ref([])
 
 </script>
 

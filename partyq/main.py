@@ -98,5 +98,5 @@ async def main():
 
     app.on_shutdown.append(middleware.on_shutdown)
     app.cleanup_ctx.append(background_tasks)
-    # app.cleanup_ctx.append(scand_task)
+    
     return app

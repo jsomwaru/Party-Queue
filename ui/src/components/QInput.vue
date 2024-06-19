@@ -9,7 +9,7 @@
 <script setup>
   import { defineProps, defineExpose, ref } from 'vue';
 
-  const results = ref(null)
+  const results = ref([])
 
   const ERROR_MESG = {
     error: 1, 
@@ -21,20 +21,28 @@
     inputType: String,
   })
 
-  defineExpose([results])
+  defineExpose({
+    results
+
+  })
 
   async function search(event) {
-    console.log(event.target)
     let form = new FormData(event.target)
     var res = await fetch(window.origin, {
       method: "post",
       body: form
     })
     if (res.ok)
-      results.value = res.json()
+      results.value = await res.json()
     else {
       results.value  = ERROR_MESG
     }
+  }
+
+  async function submit(songreq) {
+    var res = await fetch(`${window.origin}/submit`, { 
+      method: "post"
+    })
   }
 
 </script>
