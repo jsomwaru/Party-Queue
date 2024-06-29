@@ -5,9 +5,10 @@
     <div class="details">
       <span class="item" :video-id="videoId">{{ title }}</span>
       <span class="item" :video-id="videoId">{{ artist }}</span>
-      <span v-if="requestedBy" :video-id="videoId">{{ requestedBy }}</span>
       <div class="break"></div>
       <span class="item" v-if="timingInfo" id="timing-info" :video-id="videoId">{{ timingInfo }}</span>
+      <div  v-if="requestedBy" class="break"></div>
+      <span v-if="requestedBy" :video-id="videoId">{{ requestedBy }}</span>
     </div>
 </template>
 

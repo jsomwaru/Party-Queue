@@ -42,6 +42,6 @@
 <style>
   .qlist {
     display: flex;
-    flex-wrap: wrap;
+    /* flex-wrap: wrap; */
   }
 </style>

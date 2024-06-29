@@ -33,4 +33,8 @@
   a:hover {
     color: hotpink;
   };
+
+  .rlist {
+    display: grid;
+  }
 </style>

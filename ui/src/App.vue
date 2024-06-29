@@ -1,7 +1,6 @@
 <template>
   <QList role="queue"></QList>
   <QInput input-label="Song:" input-type="text" ref="searchResults" />
-  <QInput input-label="Username:" input-type="text"/>
   <ResultList :results="searchResults" ></ResultList>
 </template>
 

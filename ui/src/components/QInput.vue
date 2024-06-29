@@ -1,8 +1,8 @@
 <template>
   <div class="qinput">
   <form @submit.prevent="search">
-    <p>{{ inputLabel }}</p>
-    <input :type="inputType" name="song" value="" class="qinput"/>
+    <label :for="id">{{ inputLabel }}</label>
+    <input :type="inputType" name="song" value="" class="qinput" :id="id"/>
     <button type="submit">Submit</button>
   </form>
   </div>
@@ -12,6 +12,8 @@
   import { defineProps, defineExpose, ref } from 'vue';
 
   const results = ref([])
+
+  let id = (Math.random() + 1).toString(36).substring(4)
 
   const ERROR_MESG = {
     error: 1, 

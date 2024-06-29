@@ -74,8 +74,7 @@ async def main():
     q = Q.QM()
     app = web.Application()
     aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader('templates'))
-    app["redis"] = AppConfig.redis_uri()
-    redis = await redis_from_url(app["redis"])
+    redis = await redis_from_url(AppConfig.redis_uri())
     app["admin_enabled"]  = await init_admin(redis)
     storage = RedisStorage(redis)
     setup(app, storage)
@@ -97,13 +96,11 @@ async def main():
         web.static('/dist', "ui/dist"),
         web.get("/ui", routes.getui)
     ])
-
-    app["websockets"] = {}
     app["Q"] = q
+    app["websockets"] = {}
     app["background_tasks"] = set()
-    app["scand_event"] = threading.Event()
-    app["scand_event"].clear()
     app["DeviceManager"] = device.DeviceManager()
+
 
     app.on_shutdown.append(on_shutdown)
     app.cleanup_ctx.append(background_tasks)
