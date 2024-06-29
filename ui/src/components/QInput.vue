@@ -1,9 +1,11 @@
 <template>
+  <div class="qinput">
   <form @submit.prevent="search">
     <p>{{ inputLabel }}</p>
-    <input :type="inputType" name="song" value="" />
+    <input :type="inputType" name="song" value="" class="qinput"/>
     <button type="submit">Submit</button>
   </form>
+  </div>
 </template>
 
 <script setup>
@@ -49,3 +51,11 @@
   }
 
 </script>
+
+<style>
+  .qinput {
+    width: 80%;
+    margin: 10px auto;
+  };
+
+</style>

@@ -1,5 +1,6 @@
 import sys
 import importlib.util
+import os
 
 AUTH = "authenticated"
 PLATFORM = sys.platform
@@ -22,3 +23,8 @@ def get_device_backend():
         backend = _lazy_import("partyq.bluetooth.lbm")
     return backend
 
+class AppConfig:
+    
+    @staticmethod
+    def redis_uri():
+        return os.environ.get("REDIS_URI", "redis://127.0.0.1:6379")

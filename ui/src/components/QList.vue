@@ -25,15 +25,23 @@
 </script>
 
 <template>
-
-  <template v-for="item in queue" :key="item.videoId">
-    <QListItem 
-      :title="item.title"
-      :requested_by="item.requestor"
-      :video-id="item.videoId"
-      :img-link="item.thumbnails[0].url"
-      :timing-info="item.pos">
-    </QListItem>
-  </template>
-
+  <div class="qlist">
+    <template v-for="item in queue" :key="item.videoId">
+      <QListItem 
+        :title="item.title"
+        :artist="item.artists[0].name"
+        :requested_by="item.requestor"
+        :video-id="item.videoId"
+        :img-link="item.thumbnails[0].url"
+        :timing-info="item.pos">
+      </QListItem>
+    </template>
+  </div>
 </template>
+
+<style>
+  .qlist {
+    display: flex;
+    flex-wrap: wrap;
+  }
+</style>

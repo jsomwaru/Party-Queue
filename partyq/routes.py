@@ -1,10 +1,7 @@
-import asyncio
 import json
 import urllib.parse
-from functools import partial
 from hashlib import sha256
 
-import aiohttp
 import aiohttp_jinja2
 import redis.asyncio as redis
 from aiohttp import web
@@ -171,46 +168,16 @@ async def update_authentication(request: web.Request):
 async def list_devices(request: web.Request):
     # TODO Add authentication
     try:
-        stream = request.query.get("stream")
-        logger.info("Getting streaming %s", str(stream))
         device_manager = request.app["DeviceManager"]
-        session = await get_session(request)
-        if not stream:
-            logger.info("Listing devices")
-            # device_manager.list_devices()
-            device_manager.list_devices()
-            device_manager.run_delegate()
-            data = device_manager.get_devices()
-            device_manager.cancel()
-            if config.PLATFORM == 'darwin':
-                device_manager.run_delegate(1)
-            # logger.debug(f"%d available devices", len(data["devices"]))
-            return web.json_response(data=data, content_type="application/json")
-        elif stream == "true":
-            logger.info("Listing devices streaming")
-            event = asyncio.Event()
-            event.clear()
-            resp = WebSocketResponse()
-            await device_manager.list_devices_streaming(event)
-            await resp.prepare(request)
-            device_callback = partial(middleware.send_device_info, resp)
-            request.app["websockets"][f"device:{session}"] = resp
-            try:
-                task: asyncio.Task = asyncio.create_task(device_manager.get_devices(device_callback))
-                task.add_done_callback(request.app["background_tasks"].discard)
-                request.app["background_tasks"].add(task)
-                async for req in resp:
-                    if req.type == aiohttp.WSMsgType.TEXT:
-                        data = await req.json()
-                    if data.get("quit"):
-                        event.set()
-                        raise Exception("Client diconnected")
-            finally:
-                device_manager.scan_task.cancel()
-                task.cancel()
-                await resp.close()
-                logger.exception("")
-                return web.HTTPSuccessful()
+        logger.info("Listing devices")
+        # device_manager.list_devices()
+        device_manager.list_devices()
+        device_manager.run_delegate()
+        data = device_manager.get_devices()
+        device_manager.cancel()
+        if config.PLATFORM == 'darwin':
+            device_manager.run_delegate(1)
+        return web.json_response(data=data, content_type="application/json")
     except Exception:
         logger.exception("error")
         return web.HTTPInternalServerError(text="Error listing devices")

@@ -1,10 +1,14 @@
 <template>
-  <div class="item" :video-id="videoId">
-    <img class="block" :src="imgLink" width="50" height="50" :video-id="videoId">
-    <p class="block" :video-id="videoId">{{ title }}</p>
-    <p class="block" v-if="requestedBy" :video-id="videoId">{{ requestedBy }}</p>
-    <p class="block" v-if="timingInfo" id="timing-info" :video-id="videoId">{{ timingInfo }}</p>
+  <div class="block" :video-id="videoId">
+    <img  :src="imgLink" width="75" height="75" :video-id="videoId">
   </div>
+    <div class="details">
+      <span class="item" :video-id="videoId">{{ title }}</span>
+      <span class="item" :video-id="videoId">{{ artist }}</span>
+      <span v-if="requestedBy" :video-id="videoId">{{ requestedBy }}</span>
+      <div class="break"></div>
+      <span class="item" v-if="timingInfo" id="timing-info" :video-id="videoId">{{ timingInfo }}</span>
+    </div>
 </template>
 
 <script>
@@ -12,6 +16,7 @@
     name: 'QListItem',
     props: {
       title: String,
+      artist: String,
       imgLink: String,
       requestedBy: String,
       videoId: String,
@@ -22,8 +27,13 @@
 
 <style>
   .block {
-    display: inline-block;
+    display: block;
     padding-left: 10px;
+  }
+
+  .break {
+    flex-basis: 100%;
+    height: 0;
   }
 
   .item {

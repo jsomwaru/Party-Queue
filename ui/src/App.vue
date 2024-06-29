@@ -1,8 +1,8 @@
 <template>
+  <QList role="queue"></QList>
   <QInput input-label="Song:" input-type="text" ref="searchResults" />
   <QInput input-label="Username:" input-type="text"/>
   <ResultList :results="searchResults" ></ResultList>
-  <QList role="queue"></QList>
 </template>
 
 <script setup>
@@ -17,17 +17,17 @@
 </script>
 
 <style>
-body {
-  font-family: monospace;
-  font-size: large;
-}
-#app {
-  font-family: monospace;
-  font-size: large;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  /* text-align: center; */
-  color: #2c3e50;
-  margin-top: 60px;
-}
+  body {
+    font-family: monospace;
+    font-size: large;
+  }
+  #app {
+    font-family: monospace;
+    font-size: large;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* text-align: center; */
+    color: #2c3e50;
+    margin-top: 60px;
+  }
 </style>

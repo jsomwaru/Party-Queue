@@ -1,13 +1,16 @@
 <template>
-  <template  v-for="item in results.results" :key="item.videoId">
-    <a @click="addToQueue">
-      <QListItem
-        :title="item.title"
-        :video-id="item.videoId"
-        :img-link="item.thumbnails[0].url">
-      </QListItem>
-    </a>
-  </template>
+  <div class="rlist">
+    <template  v-for="item in results.results" :key="item.videoId">
+      <a @click="addToQueue">
+        <QListItem
+          :title="item.title"
+          :video-id="item.videoId"
+          :img-link="item.thumbnails[0].url"
+          :artist="item.artists[0].name">
+        </QListItem>
+      </a>
+    </template>
+  </div>
 </template>
 
 <script setup>
@@ -25,3 +28,9 @@
   }
 
 </script>
+
+<style>
+  a:hover {
+    color: hotpink;
+  };
+</style>
