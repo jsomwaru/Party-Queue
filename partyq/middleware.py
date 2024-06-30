@@ -34,7 +34,7 @@ async def unset_cookies(request, handler):
 async def authenticated(route_callback: Callable):
     async def auth_wrapper(request: web.Request):
         session = await get_session(request)
-        if session.get(config.AUTH):
+        if session.get(config.Cookies.AUTH.value):
             return await route_callback(request)
         else:
             return web.HTTPUnauthorized()

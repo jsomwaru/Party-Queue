@@ -45,9 +45,9 @@ async def authenticate(request: web.Request):
             conn = redis.from_url(request.app["redis"])
             admin_pass = await conn.get("admin_password")
             if sha256(password.encode()).hexdigest() == admin_pass.decode():
-                session[config.AUTH] = True
+                session[config.Cookies.AUTH.value] = True
                 res = web.HTTPAccepted()
-                res.set_cookie("authenticated", "1")
+                res.set_cookie(config.Cookies.AUTH.value, "1")
                 return res
             return web.HTTPUnauthorized()
         return web.HTTPOk()
@@ -147,7 +147,7 @@ async def toggle_playing(request: web.Request):
 async def remove(request: web.Request):
     try:
         session = await get_session(request)
-        if session.get(config.AUTH):
+        if session.get(config.Cookies.AUTH.value):
             qpos = request.match_info["qpos"]
             request.app["Q"].remove(int(qpos))
             user = session.get("username", session.identity)
