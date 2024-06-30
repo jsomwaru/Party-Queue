@@ -1,15 +1,17 @@
 <template>
-  <div class="block" :video-id="videoId">
-    <img  :src="imgLink" width="75" height="75" :video-id="videoId">
-  </div>
+  <div class="wrapper">
+    <div class="block" :video-id="videoId">
+      <img  :src="imgLink" width="75" height="75" :video-id="videoId">
+    </div>
     <div class="details">
       <span class="item" :video-id="videoId">{{ title }}</span>
-      <span class="item" :video-id="videoId">{{ artist }}</span>
+      <span class="item" :video-id="videoId">By {{ artist }}</span>
       <div class="break"></div>
       <span class="item" v-if="timingInfo" id="timing-info" :video-id="videoId">{{ timingInfo }}</span>
       <div  v-if="requestedBy" class="break"></div>
       <span v-if="requestedBy" :video-id="videoId">{{ requestedBy }}</span>
     </div>
+  </div>
 </template>
 
 <script>
@@ -30,6 +32,10 @@
   .block {
     display: block;
     padding-left: 10px;
+  }
+  
+  .wrapper {
+    display: flex;
   }
 
   .break {
