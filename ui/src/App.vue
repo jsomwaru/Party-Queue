@@ -19,6 +19,7 @@
   body {
     font-family: monospace;
     font-size: large;
+    background-color: #b2e0df;
   }
   #app {
     font-family: monospace;

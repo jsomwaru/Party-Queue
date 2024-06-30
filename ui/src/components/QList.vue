@@ -8,6 +8,20 @@
 
   var queue = ref([])
 
+  // function newQueueConnection() {
+  //   let qinfo_url = location.port != '' ?  `${window.location.hostname}:${location.port}` : `${window.location.hostname}`
+  //   const socket = new WebSocket(`ws://${qinfo_url}/qinfo`)
+  //   socket.addEventListener("open", () => {
+  //     console.log("---Connected to Queue---")
+  //   })
+
+  //   socket.addEventListener("message", (event) => {
+  //     let qdata = JSON.parse(event.data)
+  //     queue.value = qdata
+  //   })
+  //   return socket
+  // }
+
   let qinfo_url = location.port != '' ?  `${window.location.hostname}:${location.port}` : `${window.location.hostname}`
   const socket = new WebSocket(`ws://${qinfo_url}/qinfo`)
 
@@ -42,6 +56,8 @@
 <style>
   .qlist {
     display: flex;
+    overflow-x: auto;
+    max-width: 100%;
     /* flex-wrap: wrap; */
   }
 </style>

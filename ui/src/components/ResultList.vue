@@ -32,9 +32,9 @@
 <style>
   a:hover {
     color: hotpink;
-  };
+  }
 
   .rlist {
-    display: grid;
+    display: block;
   }
 </style>

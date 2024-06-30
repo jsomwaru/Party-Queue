@@ -58,6 +58,8 @@
   .qinput {
     width: 80%;
     margin: 10px auto;
-  };
-
+    /* background-color: white; */
+    transition: width 0.4s ease-in-out;
+    border-color: whitesmoke;
+  }
 </style>
