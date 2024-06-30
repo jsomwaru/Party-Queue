@@ -4,12 +4,15 @@ import sys
 from enum import Enum
 
 
+class Cookies(Enum):
+    AUTH = "authenticated"
+
 class AppConfig:
     @staticmethod
     def redis_uri():
         return os.environ.get("REDIS_URI", "redis://127.0.0.1:6379")
 
-    @staticmethod    
+    @staticmethod
     def get_device_backend():
         backend = None
         if sys.platform == "darwin":
@@ -22,9 +25,6 @@ class AppConfig:
     @staticmethod
     def PLATFORM():
         return sys.platform
-
-class Cookies(Enum):
-    AUTH = "authenticated"
 
 def _lazy_import(name: str):
     spec = importlib.util.find_spec(name)
