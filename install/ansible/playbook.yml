@@ -13,11 +13,16 @@
         name: npm
       become: yes
 
+    - name: Install NPM packages
+      ansible.builtin.command:
+        chdir: ../../ui
+        cmd: npm install
+
     - name: Build UI
       ansible.builtin.command:
         chdir: ../../ui
         cmd: npm run build
-      
+
     - name: Copy Systemd Service
       ansible.builtin.template:
         src: ../service/partyq.service
