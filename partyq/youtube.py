@@ -5,6 +5,9 @@ import ytmusicapi
 
 from pytube import YouTube
 
+import logger as log 
+
+logger = log.get_logger(__name__)
 
 DATA_DIR="media"
 BROWSER_FILE = os.path.join(DATA_DIR, "browser.json")
@@ -13,7 +16,13 @@ class NoStreamFoundException(Exception):
     pass
 
 async def search(query):
-    ytm = ytmusicapi.YTMusic(BROWSER_FILE)
+    ytm = None
+    if os.path.exists(BROWSER_FILE):
+        logger.info("Found YouTube Music Auth File")
+        ytm = ytmusicapi.YTMusic(BROWSER_FILE)
+    else:
+        logger.info("Upload YouTube Music auth file to manage library")
+        ytm = ytmusicapi.YTMusic()
     results = ytm.search(query, filter="songs")
     return results
 
