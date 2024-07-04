@@ -18,8 +18,6 @@ jobs:
           fi
           source $VENV/bin/activate 
           pip install --require-virtualenv -r requirements.txt
-          USER=$UID
-          sudo chown -R $ $USER:$USER ui
           ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook \
             install/ansible/playbook.yml \
             --inventory 127.0.0.1, -l 127.0.0.1 \
