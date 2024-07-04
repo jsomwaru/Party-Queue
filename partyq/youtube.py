@@ -5,7 +5,7 @@ import ytmusicapi
 
 from pytube import YouTube
 
-import logger as log 
+from partyq import logger as log 
 
 logger = log.get_logger(__name__)
 
