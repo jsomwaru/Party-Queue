@@ -70,8 +70,8 @@ class BluetoothBackend(DeviceBackend):
     pairable_device_filter = re.compile(r"/org/bluez/hci0/dev_.*")
 
     def __init__(self):
-        super().__init__()
         sdbus.set_default_bus(sdbus.sd_bus_open_system())
+        super().__init__()
         bus = sdbus.sd_bus_open_system()
         self.discovery = BluetoothDiscoveryLinux(bus)
         self.device_manager = DbusObjectManagerInterface(BLUETOOTH_SERVICE_NAME,
