@@ -18,7 +18,6 @@ jobs:
           fi
           source $VENV/bin/activate 
           pip install --require-virtualenv -r requirements.txt
-          docker run --rm -w /tmp/ui --volume  $(pwd)/ui:/tmp/ui node:20-alpine sh -c "npm install; npm run build;"
           USER=$UID
           sudo chown -R $ $USER:$USER ui
           ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook \
