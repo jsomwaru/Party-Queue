@@ -1,4 +1,5 @@
 <template>
+  <ToggleButton/>
   <QList role="queue"></QList>
   <QInput input-label="Song:" input-type="text" ref="searchResults" />
   <ResultList :results="searchResults" ></ResultList>
@@ -8,11 +9,11 @@
   import QList from './components/QList.vue';
   import QInput from './components/QInput.vue';
   import ResultList from "./components/ResultList.vue"
+  import ToggleButton from "./components/ToggleButton.vue"
 
   import { ref } from 'vue';
 
   const searchResults = ref([])
-
 </script>
 
 <style>
