@@ -72,7 +72,8 @@ class BluetoothBackend(DeviceBackend):
     def __init__(self):
         sdbus.set_default_bus(sdbus.sd_bus_open_system())
         super().__init__()
-        bus = sdbus.sd_bus_open_system()
+        # bus = sdbus.sd_bus_open_system()
+        bus = sdbus.sd_bus_open_system_machine()
         self.discovery = BluetoothDiscoveryLinux(bus)
         self.device_manager = DbusObjectManagerInterface(BLUETOOTH_SERVICE_NAME,
                                                          BLUETOOTH_OBJECT_MANAGER_PATH, bus)

@@ -1,15 +1,12 @@
 import asyncio
-
-from dataclasses import dataclass, asdict
+import re
+from dataclasses import asdict, dataclass
 from enum import Enum, auto
 
 import pyaudio
 
 from partyq import logger as log
-
 from partyq.config import AppConfig
-
-import re
 
 logger = log.get_logger(__name__)
 
@@ -83,6 +80,7 @@ class DeviceManager:
     def list_devices(self):
         self._remote_devices()
         return True
+
 
     def get_devices(self):
         """BAD
