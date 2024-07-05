@@ -175,7 +175,7 @@ async def list_devices(request: web.Request):
         device_manager.run_delegate()
         data = device_manager.get_devices()
         device_manager.cancel()
-        if config.PLATFORM == 'darwin':
+        if config.AppConfig.PLATFORM == 'darwin':
             device_manager.run_delegate(1)
         return web.json_response(data=data, content_type="application/json")
     except Exception:
