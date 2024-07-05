@@ -2,7 +2,6 @@
 import asyncio
 import hashlib
 import os
-import threading
 from contextlib import suppress
 
 import aiohttp_jinja2
