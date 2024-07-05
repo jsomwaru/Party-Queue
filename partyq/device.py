@@ -40,8 +40,6 @@ class DeviceManager:
     def __init__(self):
         self._audio = pyaudio.PyAudio()
         self._backend = backend.new_backend()
-        self.device_queue = asyncio.Queue()
-        self.event = asyncio.Event()
 
     def _local_devices(self):
         info = self._audio.get_host_api_info_by_index(0)
@@ -56,9 +54,7 @@ class DeviceManager:
     def _remote_devices(self):
         self._backend.start_scan()
 
-
     async def set_playback_device(self, device_id :str=None):
-
         if not device_id:
             return False
         elif not re.match(self.local_device_id, device_id):
