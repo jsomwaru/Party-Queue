@@ -3,7 +3,7 @@
   <form @submit.prevent="search">
     <label :for="id">{{ inputLabel }}</label>
     <input :type="inputType" name="song" value="" class="qinput" :id="id"/>
-    <button type="submit">Submit</button>
+    <button type="submit">Search</button>
   </form>
   </div>
 </template>

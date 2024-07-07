@@ -4,37 +4,43 @@
 
   defineProps({
     role: String,
-  })
+  });
 
-  var queue = ref([])
+function createSocket() {
+    let qinfo_url = location.port != '' ?  `${window.location.hostname}:${location.port}` : `${window.location.hostname}`
+    return new WebSocket(`ws://${qinfo_url}/qinfo`)
+  }
 
-  // function newQueueConnection() {
-  //   let qinfo_url = location.port != '' ?  `${window.location.hostname}:${location.port}` : `${window.location.hostname}`
-  //   const socket = new WebSocket(`ws://${qinfo_url}/qinfo`)
-  //   socket.addEventListener("open", () => {
-  //     console.log("---Connected to Queue---")
-  //   })
+  var queue = ref([]);
+  var retryInterval = null;
+  let socket = null;
 
-  //   socket.addEventListener("message", (event) => {
-  //     let qdata = JSON.parse(event.data)
-  //     queue.value = qdata
-  //   })
-  //   return socket
-  // }
+  (function newQueueConnection(socket) {  
 
-  let qinfo_url = location.port != '' ?  `${window.location.hostname}:${location.port}` : `${window.location.hostname}`
-  const socket = new WebSocket(`ws://${qinfo_url}/qinfo`)
+    socket = createSocket()
+    socket.addEventListener("open", () => {
+      if (retryInterval){ 
+        clearInterval(retryInterval)
+      }
+      console.log("---Connected to Queue---")
+    })
 
-  socket.addEventListener("open", () => {
-    console.log("---Connected to Queue---")
-  })
+    socket.addEventListener("message", (event) => {
+      let qdata = JSON.parse(event.data)
+      queue.value = qdata
+    })
 
-  socket.addEventListener("message", (event) => {
-    let qdata = JSON.parse(event.data)
-    queue.value = qdata
-  })
+    socket.onclose = () => {
+      retryInterval = setInterval(newQueueConnection, 5000, socket)
+    }
 
-  setInterval((socket) => {socket.send("inquire")}, 5000, socket)
+    socket.onerror = function(err) {
+      console.error('Socket encountered error: ', err.message, 'Closing socket');
+      socket.close();
+    };
+
+    setInterval((socket) => {socket.send("inquire")}, 5000, socket)
+  })(socket);
 
 </script>
 
