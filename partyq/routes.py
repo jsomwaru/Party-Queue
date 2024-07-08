@@ -15,13 +15,7 @@ from partyq.device import DeviceManager
 
 logger = log.get_logger(__name__)
 
-
-@aiohttp_jinja2.template('index.html')
 async def getreq(request: web.Request):
-    await get_session(request) # start or get session
-    return {}
-
-async def getui(request):
 	await get_session(request) # start or get session
 	return web.FileResponse("ui/dist/index.html")
 

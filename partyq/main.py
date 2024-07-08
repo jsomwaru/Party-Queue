@@ -93,7 +93,6 @@ async def main():
         web.get("/devices", routes.list_devices),
         web.put("/admin/set-device/{did}", routes.set_device),
         web.static('/dist', "ui/dist"),
-        web.get("/ui", routes.getui)
     ])
     app["Q"] = q
     app["websockets"] = {}
