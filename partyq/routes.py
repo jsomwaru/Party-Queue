@@ -141,12 +141,20 @@ async def toggle_playing(request: web.Request):
 async def remove(request: web.Request):
     try:
         session = await get_session(request)
-        if session.get(config.Cookies.AUTH.value):
+        auth_token = request.headers.get("X-AuthToken")
+        authenticated_cli = False
+        if auth_token:
+            storage = await redis.from_url(config.AppConfig.redis_uri())
+            password = await storage.get("admin_password")
+            if sha256(auth_token.encode()).hexdigest() == password.decode():
+                authenticated_cli = True
+        if session.get(config.Cookies.AUTH.value) or authenticated_cli:
             qpos = request.match_info["qpos"]
             request.app["Q"].remove(int(qpos))
             user = session.get("username", session.identity)
             logger.info("User %s removed song at pos %s", user, qpos)
             return web.HTTPAccepted(text=f"Song Removed at pos {qpos}")
+        return web.HTTPUnauthorized(text="""Sign in as the admin user to remove songs from the queue.""")
     except Exception as e:
         logger.error(e)
         return web.HTTPError(text="Failure to remove")
