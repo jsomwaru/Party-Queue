@@ -30,9 +30,9 @@ function createSocket() {
       queue.value = qdata
     })
 
-    socket.onclose = () => {
-      retryInterval = setInterval(newQueueConnection, 5000, socket)
-    }
+    // socket.onclose = () => {
+    //   retryInterval = setInterval(newQueueConnection, 5000, socket)
+    // }
 
     socket.onerror = function(err) {
       console.error('Socket encountered error: ', err.message, 'Closing socket');
@@ -59,11 +59,12 @@ function createSocket() {
   </div>
 </template>
 
-<style>
+<style scoped>
   .qlist {
     display: flex;
     overflow-x: auto;
     max-width: 100%;
+    /* margin-top: 60px; */
     /* flex-wrap: wrap; */
   }
 </style>

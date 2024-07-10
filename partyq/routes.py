@@ -124,6 +124,15 @@ async def add_username(request: web.Request):
     except Exception as e:
         logger.error("ERROR while submmiting log %s", e)
         raise web.HTTPInternalServerError(text="An error occured") from e
+    
+async def whoami(request: web.Request):
+    try:
+        session = await get_session(request)
+        username = session.get("username","")
+        return web.HTTPOk(body=json.dumps({"username": username}))
+    except Exception:
+        logger.exception("Encountered error when checking username")
+        return web.HTTPOk(body=json.dumps({"username": ""}))
 
 
 async def toggle_playing(request: web.Request):
