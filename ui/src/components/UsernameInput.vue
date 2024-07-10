@@ -2,14 +2,14 @@
   <template v-if="username_set === false">
     <div class="username-input">
       <form @submit.prevent="setUsername">
-        <label for="username">Username</label>
-        <input type="text" name="song" :value="username" class="username-input" id="username"/>
-        <button type="submit">Search</button>
+        <label for="username">Username: </label>
+        <input type="text" name="username" value="" class="username-input" id="username"/>
+        <button type="submit">Set Username</button>
       </form>
     </div>
   </template>
   <template v-else>
-    <span>{{ username }}</span>
+    <span class="username-input">{{ username }}</span>
   </template>
 </template>
 
@@ -22,14 +22,15 @@
   defineExpose([username]);
 
   (function checkUserName() {
-    fetch("/whomai")
-    .then((res) => {res.json()})
+    fetch("/whoami")
+    .then((res) => { return res.json() })
     .then((res) => {
       if(res.username.length > 0) {
         username.value = res.username
         username_set.value = true
       }
     })
+    .catch(e => console.error(e))
   })();
 
   function setUsername(event) {
@@ -38,9 +39,11 @@
       method: "post",
       body: formData
     }).then((res) => {
-      if (res.ok)
+      if (res.ok) {
         username_set.value = true;
-    })
+        return res.json()
+      }
+    }).then((res) => {username.value = res.username})
   }
 
 </script>
