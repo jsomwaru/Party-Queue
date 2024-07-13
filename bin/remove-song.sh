@@ -1,4 +1,5 @@
 #!/bin/bash
+
 BASEURL="${2:-localhost}"
 
 admin_pass=$(cat ../media/.admin_pass)
