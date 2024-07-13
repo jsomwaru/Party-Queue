@@ -50,7 +50,7 @@ function createSocket() {
       <QListItem 
         :title="item.title"
         :artist="item.artists[0].name"
-        :requested_by="item.requestor"
+        :requested-by="item.requestor"
         :video-id="item.videoId"
         :img-link="item.thumbnails[0].url"
         :timing-info="item.pos">

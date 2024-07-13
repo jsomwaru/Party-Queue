@@ -9,7 +9,8 @@
       <div class="break"></div>
       <span class="item" v-if="timingInfo" id="timing-info" :video-id="videoId">{{ timingInfo }}</span>
       <div  v-if="requestedBy" class="break"></div>
-      <span v-if="requestedBy" :video-id="videoId">{{ requestedBy }}</span>
+      <label for="requestor">Requested By: </label>
+      <span v-if="requestedBy" :video-id="videoId" name="requestor">{{ requestedBy }}</span>
     </div>
   </div>
 </template>
