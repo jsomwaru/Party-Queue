@@ -1,10 +1,7 @@
-import asyncio
 import json
 import urllib.parse
-from functools import partial
 from hashlib import sha256
 
-import aiohttp
 import aiohttp_jinja2
 import redis.asyncio as redis
 from aiohttp import web
@@ -18,11 +15,9 @@ from partyq.device import DeviceManager
 
 logger = log.get_logger(__name__)
 
-
-@aiohttp_jinja2.template('index.html')
 async def getreq(request: web.Request):
-    await get_session(request) # start or get session
-    return {}
+	await get_session(request) # start or get session
+	return web.FileResponse("ui/dist/index.html")
 
 
 @aiohttp_jinja2.template('admin.html')
@@ -44,9 +39,9 @@ async def authenticate(request: web.Request):
             conn = redis.from_url(request.app["redis"])
             admin_pass = await conn.get("admin_password")
             if sha256(password.encode()).hexdigest() == admin_pass.decode():
-                session[config.AUTH] = True
+                session[config.Cookies.AUTH.value] = True
                 res = web.HTTPAccepted()
-                res.set_cookie("authenticated", "1")
+                res.set_cookie(config.Cookies.AUTH.value, "1")
                 return res
             return web.HTTPUnauthorized()
         return web.HTTPOk()
@@ -74,6 +69,7 @@ async def add(request: web.Request):
     session = await get_session(request)
     try:
         video_id = data["videoId"]
+        logger.info(video_id)
         metadata = None
         cache = session.get("cache")
         if not cache:
@@ -122,12 +118,22 @@ async def add_username(request: web.Request):
         username = data["username"]
         session["username"] = username
         logger.info("username %s", username)
-        resp = web.HTTPAccepted()
+        resp = web.json_response({'username': username})
         resp.set_cookie("username", "1")
         return resp
     except Exception as e:
         logger.error("ERROR while submmiting log %s", e)
         raise web.HTTPInternalServerError(text="An error occured") from e
+  
+    
+async def whoami(request: web.Request):
+    try:
+        session = await get_session(request)
+        username = session.get("username","")
+        return web.json_response({"username": username})
+    except Exception:
+        logger.exception("Encountered error when checking username")
+        return web.json_response({"username": ""})
 
 
 async def toggle_playing(request: web.Request):
@@ -145,12 +151,20 @@ async def toggle_playing(request: web.Request):
 async def remove(request: web.Request):
     try:
         session = await get_session(request)
-        if session.get(config.AUTH):
+        auth_token = request.headers.get("X-AuthToken")
+        authenticated_cli = False
+        if auth_token:
+            storage = await redis.from_url(config.AppConfig.redis_uri())
+            password = await storage.get("admin_password")
+            if sha256(auth_token.encode()).hexdigest() == password.decode():
+                authenticated_cli = True
+        if session.get(config.Cookies.AUTH.value) or authenticated_cli:
             qpos = request.match_info["qpos"]
             request.app["Q"].remove(int(qpos))
             user = session.get("username", session.identity)
             logger.info("User %s removed song at pos %s", user, qpos)
             return web.HTTPAccepted(text=f"Song Removed at pos {qpos}")
+        return web.HTTPUnauthorized(text="""Sign in as the admin user to remove songs from the queue.""")
     except Exception as e:
         logger.error(e)
         return web.HTTPError(text="Failure to remove")
@@ -166,46 +180,16 @@ async def update_authentication(request: web.Request):
 async def list_devices(request: web.Request):
     # TODO Add authentication
     try:
-        stream = request.query.get("stream")
-        logger.info("Getting streaming %s", str(stream))
         device_manager = request.app["DeviceManager"]
-        session = await get_session(request)
-        if not stream:
-            logger.info("Listing devices")
-            # device_manager.list_devices()
-            device_manager.list_devices()
-            device_manager.run_delegate()
-            data = device_manager.get_devices()
-            device_manager.cancel()
-            if config.PLATFORM == 'darwin':
-                device_manager.run_delegate(1)
-            # logger.debug(f"%d available devices", len(data["devices"]))
-            return web.json_response(data=data, content_type="application/json")
-        elif stream == "true":
-            logger.info("Listing devices streaming")
-            event = asyncio.Event()
-            event.clear()
-            resp = WebSocketResponse()
-            await device_manager.list_devices_streaming(event)
-            await resp.prepare(request)
-            device_callback = partial(middleware.send_device_info, resp)
-            request.app["websockets"][f"device:{session}"] = resp
-            try:
-                task: asyncio.Task = asyncio.create_task(device_manager.get_devices(device_callback))
-                task.add_done_callback(request.app["background_tasks"].discard)
-                request.app["background_tasks"].add(task)
-                async for req in resp:
-                    if req.type == aiohttp.WSMsgType.TEXT:
-                        data = await req.json()
-                    if data.get("quit"):
-                        event.set()
-                        raise Exception("Client diconnected")
-            finally:
-                device_manager.scan_task.cancel()
-                task.cancel()
-                await resp.close()
-                logger.exception("")
-                return web.HTTPSuccessful()
+        logger.info("Listing devices")
+        # device_manager.list_devices()
+        device_manager.list_devices()
+        device_manager.run_delegate()
+        data = device_manager.get_devices()
+        device_manager.cancel()
+        if config.AppConfig.PLATFORM == 'darwin':
+            device_manager.run_delegate(1)
+        return web.json_response(data=data, content_type="application/json")
     except Exception:
         logger.exception("error")
         return web.HTTPInternalServerError(text="Error listing devices")

@@ -6,4 +6,4 @@ User=github
 Environment="VIRTUAL_ENV={{ virtualenv }}"
 WorkingDirectory=/opt/actions-runner/_work/Party-Queue/Party-Queue/
 PIDFile=/opt/actions-runner/_work/Party-Queue/Party-Queue/pid
-ExecStart=/opt/actions-runner/_work/Party-Queue/Party-Queue/start.sh
+ExecStart=/opt/actions-runner/_work/Party-Queue/Party-Queue/bin/start.sh

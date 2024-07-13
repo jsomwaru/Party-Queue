@@ -1,27 +1,12 @@
-import asyncio
 from typing import Callable
 
-from aiohttp import WSCloseCode, web
+from aiohttp import web
 from aiohttp_session import get_session
 
 from partyq import Q, config
 from partyq import logger as log
-import json
 
 logger = log.get_logger(__name__)
-
-async def on_shutdown(app):
-    for ws in app['websockets'].values():
-        try:
-            await ws.close(code=WSCloseCode.GOING_AWAY, message='Server shutdown')
-        except Exception:
-            pass
-    try:
-        for i in app["background_tasks"]:
-            await i.cancel()
-    except asyncio.CancelledError:
-        pass
-
 
 def spam_detector(request: dict, q: Q.QM):
     duplicates = q.get_by_videoid(request["videoId"])
@@ -42,14 +27,14 @@ async def unset_cookies(request, handler):
     # Unset authenticated
     authenticated = session.get("authenticated")
     if not authenticated:
-          resp.del_cookie("authenticated")
+        resp.del_cookie("authenticated")
     return resp
 
 
 async def authenticated(route_callback: Callable):
     async def auth_wrapper(request: web.Request):
         session = await get_session(request)
-        if session.get(config.AUTH):
+        if session.get(config.Cookies.AUTH.value):
             return await route_callback(request)
         else:
             return web.HTTPUnauthorized()

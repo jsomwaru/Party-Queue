@@ -1,16 +1,12 @@
 import asyncio
-
-from dataclasses import dataclass, asdict
-from datetime import datetime, timezone
+import re
+from dataclasses import asdict, dataclass
 from enum import Enum, auto
 
 import pyaudio
 
 from partyq import logger as log
-
-from partyq import config
-
-import re
+from partyq.config import AppConfig
 
 logger = log.get_logger(__name__)
 
@@ -19,7 +15,7 @@ class DeviceType(str, Enum):
     REMOTE = auto()
     LOCAL = auto()
 
-backend = config.get_device_backend()
+backend = AppConfig.get_device_backend()
 
 class DeviceManager:
     """Manage Playback device
@@ -44,8 +40,6 @@ class DeviceManager:
     def __init__(self):
         self._audio = pyaudio.PyAudio()
         self._backend = backend.new_backend()
-        self.device_queue = asyncio.Queue()
-        self.event = asyncio.Event()
 
     def _local_devices(self):
         info = self._audio.get_host_api_info_by_index(0)
@@ -60,9 +54,7 @@ class DeviceManager:
     def _remote_devices(self):
         self._backend.start_scan()
 
-
     async def set_playback_device(self, device_id :str=None):
-
         if not device_id:
             return False
         elif not re.match(self.local_device_id, device_id):
@@ -85,13 +77,13 @@ class DeviceManager:
         self._remote_devices()
         return True
 
+
     def get_devices(self):
         """BAD
         This help retrieve devices from the scanning backend
         """
         ret = { }
-        if config.PLATFORM == "darwin":
-            # self.devices = self._backend.found_devices()
+        if AppConfig.PLATFORM == "darwin":
             ret["devices"] =  [
                 {
                     "dtype": DeviceType.REMOTE,
@@ -101,7 +93,7 @@ class DeviceManager:
                 for d in self._backend.found_devices()
             ]
             logger.info(ret)
-        elif config.PLATFORM == "linux":
+        elif AppConfig.PLATFORM == "linux":
             ret["devices"] = [
                 {
                     "dtype": DeviceType.REMOTE,

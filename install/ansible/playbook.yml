@@ -1,6 +1,28 @@
 ---
 - hosts: all
   tasks:
+    - name: Install NodeJs
+      ansible.builtin.package:
+        state: present
+        name: nodejs
+      become: yes
+
+    - name: Install NPM
+      ansible.builtin.package:
+        state: present
+        name: npm
+      become: yes
+
+    - name: Install NPM packages
+      ansible.builtin.command:
+        chdir: ../../ui
+        cmd: npm install
+
+    - name: Build UI
+      ansible.builtin.command:
+        chdir: ../../ui
+        cmd: npm run build
+
     - name: Copy Systemd Service
       ansible.builtin.template:
         src: ../service/partyq.service

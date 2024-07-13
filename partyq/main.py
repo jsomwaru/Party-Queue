@@ -2,20 +2,19 @@
 import asyncio
 import hashlib
 import os
-import threading
 from contextlib import suppress
 
 import aiohttp_jinja2
 import jinja2
-from aiohttp import web
+from aiohttp import WSCloseCode, web
 from aiohttp_session import setup
 from aiohttp_session.redis_storage import RedisStorage
-from redis.asyncio import from_url
+from redis.asyncio import from_url as redis_from_url
 
-import partyq.bluetoothd as bluetoothd
 from partyq import Q, device
 from partyq import logger as log
 from partyq import middleware, routes
+from partyq.config import AppConfig
 
 logger = log.get_logger(__name__)
 
@@ -61,13 +60,20 @@ async def background_tasks(app):
     with suppress(asyncio.exceptions.CancelledError):
         await app["partyq"]
 
+async def on_shutdown(app):
+    with suppress(Exception):
+        for ws in app['websockets'].values():
+            await ws.close(code=WSCloseCode.GOING_AWAY, message='Server shutdown')
+    with suppress(asyncio.exceptions.CancelledError):
+        for i in app["background_tasks"]:
+            await i.cancel()
+
 
 async def main():
     q = Q.QM()
     app = web.Application()
     aiohttp_jinja2.setup(app, loader=jinja2.FileSystemLoader('templates'))
-    app["redis"] = "redis://127.0.0.1:6379"
-    redis = await from_url(app["redis"])
+    redis = await redis_from_url(AppConfig.redis_uri())
     app["admin_enabled"]  = await init_admin(redis)
     storage = RedisStorage(redis)
     setup(app, storage)
@@ -85,17 +91,17 @@ async def main():
         web.post("/admin/auth", routes.authenticate),
         web.post("/admin/update-authentication", routes.update_authentication),
         web.get("/devices", routes.list_devices),
-        web.put("/admin/set-device/{did}", routes.set_device)
+        web.put("/admin/set-device/{did}", routes.set_device),
+        web.static('/dist', "ui/dist"),
+        web.get("/whoami", routes.whoami)
     ])
-
-    app["websockets"] = {}
     app["Q"] = q
+    app["websockets"] = {}
     app["background_tasks"] = set()
-    app["scand_event"] = threading.Event()
-    app["scand_event"].clear()
     app["DeviceManager"] = device.DeviceManager()
 
-    app.on_shutdown.append(middleware.on_shutdown)
+
+    app.on_shutdown.append(on_shutdown)
     app.cleanup_ctx.append(background_tasks)
-    # app.cleanup_ctx.append(scand_task)
+    
     return app
