@@ -1,6 +1,9 @@
 name: "Deploy PartyQ"
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - master
 jobs:
   Deploy:
     runs-on: "self-hosted"
