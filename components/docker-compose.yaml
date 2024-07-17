@@ -12,11 +12,12 @@ services:
         reservations:
           cpus: '0.5'
           memory: 20M
-  # nginx:
-  #   image: nginx
-  #   ports:
-  #     - 0.0.0.0:80:80
-  #   network_mode: "host"
-  #   volumes: 
-  #     - files/nginx.conf:/etc/nginx/nginx.conf
+  nginx:
+    image: nginx:1.27.0-alpine
+    ports:
+      - 0.0.0.0:80:80
+    network_mode: "host"
+    volumes: 
+      - /opt/actions-runner/_work/Party-Queue/Party-Queue/components/files/nginx.conf:/etc/nginx/nginx.conf
+      - /opt/actions-runner/_work/Party-Queue/Party-Queue/ui/dist:/etc/partyq/dist
       
