@@ -2,7 +2,6 @@
 Description="PartyQ"
 
 [Service]
-User=github
 Environment="VIRTUAL_ENV={{ virtualenv }}"
 WorkingDirectory=/opt/actions-runner/_work/Party-Queue/Party-Queue/
 PIDFile=/opt/actions-runner/_work/Party-Queue/Party-Queue/pid
