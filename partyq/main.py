@@ -80,7 +80,7 @@ async def main():
     app.middlewares.append(middleware.unset_cookies)
     app.add_routes([
         web.get('/', routes.getreq),
-        web.post('/', routes.songreq),
+        web.post('/search', routes.songreq),
         web.post('/add', routes.add),
         web.get('/qinfo', routes.QWatcher),
         web.post('/setuser', routes.add_username),

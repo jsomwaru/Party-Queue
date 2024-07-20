@@ -32,7 +32,7 @@
 
   async function search(event) {
     let form = new FormData(event.target)
-    var res = await fetch(window.origin, {
+    var res = await fetch(`${window.origin}/search`, {
       method: "post",
       body: form
     })
