@@ -1,6 +1,6 @@
 # PartyQ
 
-Shitty way to play songs
+Not the best way to play songs
 
 ## Setup
 
